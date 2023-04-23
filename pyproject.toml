@@ -14,6 +14,9 @@ quart = "^0.18.4"
 black = "^23.3.0"
 ruff = "^0.0.262"
 
+[tool.poetry.scripts]
+start = "social_snake:run"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
