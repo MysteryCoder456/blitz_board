@@ -9,13 +9,20 @@ packages = [{include = "social_snake"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 quart = "^0.18.4"
+quart-sqlalchemy = "^2.0.0"
+python-dotenv = "^1.0.0"
+psycopg2 = "^2.9.6"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 ruff = "^0.0.262"
+alembic = "^1.10.4"
 
 [tool.poetry.scripts]
 start = "social_snake:run"
+
+[tool.ruff]
+ignore = ["E402"]
 
 [build-system]
 requires = ["poetry-core"]
