@@ -12,6 +12,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DB_URI")
 db = SQLAlchemy(app)
 
 from . import models
+from .auth import auth_bp
+
+app.register_blueprint(auth_bp)
 
 
 @app.route("/")
