@@ -1,0 +1,44 @@
+:root {
+  --neon-blue: #4361eeff;
+  --gunmetal: #262b2bff;
+  --ghost-white: #fbfbffff;
+  --red-munsell: #f21b3fff;
+  --eerie-black: #1d2020ff;
+}
+
+@font-face {
+  font-family: "Roboto Mono";
+  src: url("fonts/RobotoMono.ttf");
+}
+
+body {
+  background: var(--gunmetal);
+  color: var(--ghost-white);
+  font-family: "Roboto Mono";
+}
+
+nav {
+  background: var(--eerie-black);
+}
+
+nav > div {
+  margin: auto 0;
+}
+
+nav a {
+  margin: 0 7px;
+}
+
+main {
+  background: var(--eerie-black);
+}
+
+.site-name {
+  color: #ffffff;
+  font-weight: bold;
+  transition: color 0.1s ease-in-out;
+}
+
+.site-name:hover {
+  color: var(--red-munsell);
+}
