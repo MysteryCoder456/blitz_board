@@ -19,6 +19,7 @@ body {
 
 nav {
   background: var(--eerie-black);
+  width: 100%;
 }
 
 nav > div {
