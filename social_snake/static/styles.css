@@ -11,14 +11,20 @@
   src: url("fonts/RobotoMono.ttf");
 }
 
+html {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   background: var(--gunmetal);
   color: var(--ghost-white);
   font-family: "Roboto Mono";
+  width: 100%;
+  height: 100%;
 }
 
 nav {
-  background: var(--eerie-black);
   width: 100%;
 }
 
@@ -26,8 +32,33 @@ nav > div {
   margin: auto 0;
 }
 
-main {
+form {
+  margin: 0 25%;
+}
+
+input {
   background: var(--eerie-black);
+  border-radius: 8px;
+  box-shadow: 0 3px 6px #0000006b;
+  transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+input:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 9px #0000006b;
+}
+
+input[type="submit"] {
+  background: var(--eerie-black);
+  padding: 10px;
+  cursor: pointer;
+}
+
+.main-container {
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  height: max-content;
 }
 
 .site-name {
@@ -43,9 +74,12 @@ main {
 
 .nav-link {
   margin: 0 7px;
-  transition: color 0.1s ease-in-out;
+  padding: 8px;
+  border-radius: 8px;
+  background: #00000000;
+  transition: background 0.1s ease-in-out;
 }
 
 .nav-link:hover {
-  color: gray;
+  background: var(--eerie-black);
 }

@@ -10,22 +10,25 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css' ) }}">
 </head>
 
-<body class="grid grid-rows-2 grid-cols-12">
+<body>
     <nav class="fixed p-4 grid grid-cols-9">
         <div class="col-start-2 col-span-5">
-            <a class="site-name text-xl me-5">Social Snake</a>
-            <a class="nav-link text-xl" href="#">Home</a>
+            <a class="site-name text-xl me-5" href="{{ url_for('landing_page') }}">Social Snake</a>
+            <a class="nav-link text-xl" href="{{ url_for('landing_page') }}">Home</a>
             <a class="nav-link text-xl" href="#">Recent</a>
         </div>
-        <div class="col-start-7 col-span-2">
-            <a class="nav-link text-xl" href="#">Login</a>
-            <a class="nav-link text-xl" href="#">Sign Up</a>
+        <div class="text-right col-start-7 col-span-2">
+            <a class="nav-link text-xl" href="{{ url_for('auth.login') }}">Login</a>
+            <a class="nav-link text-xl" href="{{ url_for('auth.signup') }}">Sign Up</a>
         </div>
     </nav>
 
-    <main class="row-start-2 row-span-1 col-start-3 col-span-8 mt-5 mx-3 p-3 text-lg drop-shadow-lg rounded-xl">
-        {% block main %} {% endblock main %}
-    </main>
+    <div class="main-container grid grid-cols-12">
+        <main
+            class="lg:col-start-3 lg:col-span-8 md:col-start-2 md:col-span-10 sm:col-start-1 sm:col-span-12 mx-3 p-3 text-lg">
+            {% block main %} {% endblock main %}
+        </main>
+    </div>
 </body>
 
 </html>

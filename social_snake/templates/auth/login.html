@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class="text-center">
+    <h1 class="text-2xl">Enter Your Email Address</h1>
+    <p>We'll send you a link to automatically log you in!</p>
+</div>
+
+<br>
+
+<form method="post" class="text-center">
+    {{ form.csrf_token }}
+    <div class="grid grid-cols-7">
+        {{ form.email.label(class="col-span-2") }} {{ form.email(class="px-2 col-span-5", placeholder="user@mail.com") }}
+    </div>
+    <br>
+    {{ form.submit }}
+</form>
+{% endblock main %}
