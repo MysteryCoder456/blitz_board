@@ -26,10 +26,6 @@ nav > div {
   margin: auto 0;
 }
 
-nav a {
-  margin: 0 7px;
-}
-
 main {
   background: var(--eerie-black);
 }
@@ -37,9 +33,19 @@ main {
 .site-name {
   color: #ffffff;
   font-weight: bold;
+  cursor: pointer;
   transition: color 0.1s ease-in-out;
 }
 
 .site-name:hover {
   color: var(--red-munsell);
+}
+
+.nav-link {
+  margin: 0 7px;
+  transition: color 0.1s ease-in-out;
+}
+
+.nav-link:hover {
+  color: gray;
 }
