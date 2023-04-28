@@ -16,14 +16,11 @@ auth_bp = Blueprint(
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 async def login():
-    form = LoginForm()
+    form = LoginForm(await request.form)
 
-    if request.method == "POST":
-        form = LoginForm(await request.form)
-
-        if await form.validate_on_submit():
-            print(f"Emailing link to {form.email.data}")
-            # TODO: Do the link sending
+    if await form.validate_on_submit():
+        print(f"Emailing link to {form.email.data}")
+        # TODO: Do the link sending
 
     return await render_template("login.html", form=form)
 
