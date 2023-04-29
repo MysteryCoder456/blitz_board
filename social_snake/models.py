@@ -7,6 +7,13 @@ class User(db.Model):
     email = db.Column(db.String, unique=True, nullable=False)
 
 
+class UnverifiedUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String, unique=True, nullable=False)
+    url_code = db.Column(db.Uuid, unique=True, nullable=False)
+    valid_until = db.Column(db.DateTime, nullable=False)
+
+
 class MagicLink(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
