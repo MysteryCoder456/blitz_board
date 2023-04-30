@@ -1,0 +1,14 @@
+{% macro render_field(field, placeholder="") %}
+<div class="grid grid-cols-7 my-4">
+    {{ field.label(class="col-span-2") }}
+    {{ field(class="px-2 col-span-5", placeholder=placeholder) }}
+
+    {% if field.errors %}
+    <ul class="text-red-500 col-span-7 mt-2">
+        {% for error in field.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endmacro %}
