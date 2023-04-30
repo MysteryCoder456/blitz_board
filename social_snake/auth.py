@@ -4,8 +4,8 @@ from uuid import uuid4, UUID
 
 from quart import Blueprint, flash, redirect, render_template, request, url_for
 from quart_wtf import QuartForm
-from wtforms import EmailField, SubmitField
-from wtforms.validators import Email
+from wtforms import EmailField, StringField, SubmitField
+from wtforms.validators import Email, Length
 
 from . import db, models, app, utils
 
@@ -14,6 +14,14 @@ LINK_DURATION = timedelta(hours=2)
 
 class LoginForm(QuartForm):
     email = EmailField(label="Email", validators=[Email()])
+    submit = SubmitField()
+
+
+class SignUpForm(QuartForm):
+    username = StringField(
+        label="Username",
+        validators=[Length(min=3, max=30)],
+    )
     submit = SubmitField()
 
 
@@ -47,10 +55,12 @@ async def login():
             unverified_user.valid_until = datetime.now() + LINK_DURATION
             db.session.commit()
 
+            endpoint = url_for(
+                "auth.verify_registration",
+                code=unverified_user.url_code.hex,
+            )
             verify_link = (
-                f"http://127.0.0.1:5000/auth/verify/{unverified_user.url_code}"
-                if app.debug
-                else ""
+                f"http://127.0.0.1:5000{endpoint}" if app.debug else ""
             )  # TODO: Set else condition url for production
 
             msg = EmailMessage()
@@ -78,6 +88,32 @@ async def login():
     return await render_template("login.html", form=form)
 
 
-@auth_bp.route("/v-reg/<uuid:code>", methods=["GET"])
-async def verify_registration(code: UUID):
-    return await render_template("verify_registration.html")
+@auth_bp.route("/v-reg/<code>", methods=["GET", "POST"])
+async def verify_registration(code: str):
+    query = db.select(models.UnverifiedUser).where(
+        models.UnverifiedUser.url_code == UUID(code)
+    )
+    unverified_user = db.one_or_404(query)
+
+    if unverified_user.valid_until < datetime.now():
+        await flash("Invalid registration link, please try again.", "error")
+        return redirect(url_for("auth.login"))
+
+    form = SignUpForm(await request.form)
+
+    if await form.validate_on_submit():
+        new_user = models.User()
+        new_user.username = form.username.data
+        new_user.email = unverified_user.email
+        db.session.add(new_user)
+
+        db.session.delete(unverified_user)
+        db.session.commit()
+
+        await flash(
+            "Congrats! Your account was created successfully.", "success"
+        )
+        # TODO: Log user in
+        return redirect(url_for("landing_page"))
+
+    return await render_template("verify_registration.html", form=form)
