@@ -194,6 +194,44 @@ dnspython = ">=2.0.0"
 idna = ">=2.0.0"
 
 [[package]]
+name = "flask"
+version = "2.2.4"
+description = "A simple framework for building complex web applications."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Flask-2.2.4-py3-none-any.whl", hash = "sha256:13f6329ddbfff11340939cd11919daf150a01358ded4b7e81c03c055dfecb559"},
+    {file = "Flask-2.2.4.tar.gz", hash = "sha256:77504c4c097f56ac5f29b00f9009213010cf9d2923a288c0e0564a5db2bb53d6"},
+]
+
+[package.dependencies]
+click = ">=8.0"
+itsdangerous = ">=2.0"
+Jinja2 = ">=3.0"
+Werkzeug = ">=2.2.2"
+
+[package.extras]
+async = ["asgiref (>=3.2)"]
+dotenv = ["python-dotenv"]
+
+[[package]]
+name = "flask-login"
+version = "0.6.2"
+description = "User authentication and session management for Flask."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "Flask-Login-0.6.2.tar.gz", hash = "sha256:c0a7baa9fdc448cdd3dd6f0939df72eec5177b2f7abe6cb82fc934d29caac9c3"},
+    {file = "Flask_Login-0.6.2-py3-none-any.whl", hash = "sha256:1ef79843f5eddd0f143c2cd994c1b05ac83c0401dc6234c143495af9a939613f"},
+]
+
+[package.dependencies]
+Flask = ">=1.0.4"
+Werkzeug = ">=1.0.1"
+
+[[package]]
 name = "greenlet"
 version = "2.0.2"
 description = "Lightweight in-process concurrent programming"
@@ -822,4 +860,4 @@ email = ["email-validator"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "5b4a94d5cced87ff2aaf7f25abd1d038e5f84aaf1d0380ecdd2468bae3f1f7f1"
+content-hash = "db83ed00ea19f121b1e3f0236dec6810f591cb8f47f4653cf01ca4888b2306c8"

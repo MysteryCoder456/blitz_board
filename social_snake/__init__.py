@@ -8,6 +8,7 @@ from quart_wtf.csrf import (
     DEFAULT_SUBMIT_METHODS,
     DEFAULT_CSRF_FIELD_NAME,
 )
+from flask_login import LoginManager
 from aiosmtplib import SMTP
 
 load_dotenv()
@@ -28,6 +29,7 @@ app.config["WTF_CSRF_FIELD_NAME"] = DEFAULT_CSRF_FIELD_NAME
 csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 smtp = SMTP("smtp.gmail.com", 587)
+# login_manager = LoginManager(app)  # FIXME: gives context errors
 
 from . import models
 from .auth import auth_bp

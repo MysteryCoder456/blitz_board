@@ -4,7 +4,7 @@ from uuid import uuid4, UUID
 
 from quart import Blueprint, flash, redirect, render_template, request, url_for
 from quart_wtf import QuartForm
-from wtforms import EmailField, StringField, SubmitField
+from wtforms import EmailField, StringField, SubmitField, ValidationError
 from wtforms.validators import Email, Length
 
 from . import db, models, app, utils
@@ -23,6 +23,14 @@ class SignUpForm(QuartForm):
         validators=[Length(min=3, max=30)],
     )
     submit = SubmitField()
+
+    def validate_username(self, username):
+        query = db.select(models.User).where(
+            models.User.username == username.data
+        )
+
+        if db.session.scalar(query):
+            raise ValidationError("This username is already taken!")
 
 
 auth_bp = Blueprint(
@@ -111,7 +119,8 @@ async def verify_registration(code: str):
         db.session.commit()
 
         await flash(
-            "Congrats! Your account was created successfully.", "success"
+            "Congratulations, your account was created successfully!",
+            "success",
         )
         # TODO: Log user in
         return redirect(url_for("landing_page"))
