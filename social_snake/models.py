@@ -11,6 +11,9 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
 
+    def __str__(self):
+        return self.username
+
 
 @login_manager.user_loader
 def user_loader(user_id) -> Optional[User]:
@@ -25,5 +28,8 @@ class UnverifiedUser(db.Model):
 
 
 class MagicLink(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.ForeignKey(User.id), primary_key=True)
+    url_code = db.Column(db.Uuid, unique=True, nullable=False)
+    valid_until = db.Column(db.DateTime, nullable=False)
+
+    user = db.relationship(User)

@@ -55,7 +55,7 @@ def login():
             query = db.select(models.UnverifiedUser).where(
                 models.UnverifiedUser.email == form.email.data
             )
-            unverified_user = db.session.execute(query).scalar()
+            unverified_user = db.session.scalar(query)
 
             if not unverified_user:
                 unverified_user = models.UnverifiedUser()
@@ -75,9 +75,9 @@ def login():
             )  # TODO: Set else condition url for production
 
             msg_content = [
-                "Click on this link to confirm your registration and create ",
-                f"a new account.\n{verify_link}\nPlease do not share this ",
-                "link with anyone. Happy Puzzling! :)",
+                "Click on this link to confirm and create a new account.",
+                verify_link,
+                "Please do not share this link with anyone. Happy Puzzling! :)",
             ]
             smtp.send(
                 to=form.email.data,
@@ -92,11 +92,47 @@ def login():
             )
             return redirect(url_for("landing_page"))
 
-        else:
-            # TODO: Login Link
-            app.logger.debug(f"Sent login link to {form.email.data}")
+        else:  # User has an account
+            query = db.select(models.MagicLink).where(
+                models.MagicLink.user == user
+            )
+            magic_link = db.session.scalar(query)
 
-    # TODO: show validation errors in template
+            if not magic_link:
+                magic_link = models.MagicLink()
+                magic_link.user = user
+                db.session.add(magic_link)
+
+            magic_link.url_code = uuid4()
+            magic_link.valid_until = datetime.now() + LINK_DURATION
+            db.session.commit()
+
+            endpoint = url_for(
+                "auth.verify_login",
+                code=magic_link.url_code.hex,
+            )
+            verify_link = (
+                f"http://127.0.0.1:5000{endpoint}" if app.debug else ""
+            )  # TODO: Set else condition url for production
+
+            msg_content = [
+                "Click on this link to log into your account.",
+                verify_link,
+                "Please do not share this link with anyone. Happy Puzzling! :)",
+            ]
+            smtp.send(
+                to=form.email.data,
+                subject="Confirm Login",
+                contents=msg_content,
+            )
+
+            app.logger.debug(f"Sent login link to {form.email.data}")
+            flash(
+                f"Login link has been sent to your email ({form.email.data}).",
+                "success",
+            )
+            return redirect(url_for("landing_page"))
+
     return render_template("login.html", form=form)
 
 
@@ -130,3 +166,19 @@ def verify_registration(code: str):
         return redirect(url_for("landing_page"))
 
     return render_template("verify_registration.html", form=form)
+
+
+@auth_bp.route("/v-log/<code>", methods=["GET"])
+def verify_login(code: str):
+    query = db.select(models.MagicLink).where(
+        models.MagicLink.url_code == UUID(code)
+    )
+    magic_link = db.one_or_404(query)
+
+    if magic_link.valid_until < datetime.now():
+        flash("Invalid login link, please try again.", "error")
+        return redirect(url_for("auth.login"))
+
+    login_user(magic_link.user, remember=True, duration=timedelta(days=1))
+    flash(f"Welcome back, {magic_link.user}!", "success")
+    return redirect("/")
