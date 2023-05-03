@@ -8,14 +8,14 @@ packages = [{include = "social_snake"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-quart = "^0.18.4"
-quart-sqlalchemy = "^2.0.0"
 python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
-quart-wtf = "^0.0.1"
 email-validator = "^2.0.0.post2"
-aiosmtplib = "^2.0.1"
 flask-login = "^0.6.2"
+flask = "^2.3.2"
+flask-sqlalchemy = "^3.0.3"
+flask-wtf = "^1.1.1"
+yagmail = "^0.15.293"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
