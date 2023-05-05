@@ -168,7 +168,7 @@ def verify_registration(code: str):
     return render_template("verify_registration.html", form=form)
 
 
-@auth_bp.route("/v-log/<code>", methods=["GET"])
+@auth_bp.get("/v-log/<code>")
 def verify_login(code: str):
     query = db.select(models.MagicLink).where(
         models.MagicLink.url_code == UUID(code)

@@ -22,14 +22,11 @@ login_manager.login_view = "auth.login"  # type: ignore
 login_manager.login_message_category = "info"
 
 from . import models
+from .main import main_bp
 from .auth import auth_bp
 
+app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp)
-
-
-@app.route("/")
-def landing_page():
-    return render_template("landing.html")
 
 
 def run():

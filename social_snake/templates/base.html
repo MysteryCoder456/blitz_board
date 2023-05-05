@@ -2,9 +2,10 @@
 <html lang="en">
 
 <head>
-    <title></title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}Example Title{% endblock title %} - Social Snake</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css' ) }}">
@@ -13,8 +14,8 @@
 <body>
     <nav class="fixed p-4 grid grid-cols-9">
         <div class="col-start-2 col-span-5">
-            <a class="site-name text-xl me-5" href="{{ url_for('landing_page') }}">Social Snake</a>
-            <a class="nav-link text-xl" href="{{ url_for('landing_page') }}">Home</a>
+            <a class="site-name text-xl me-5" href="{{ url_for('main.home') }}">Social Snake</a>
+            <a class="nav-link text-xl" href="{{ url_for('main.home') }}">Home</a>
             <a class="nav-link text-xl" href="#">Recent</a>
         </div>
         <div class="text-right col-start-7 col-span-2">
