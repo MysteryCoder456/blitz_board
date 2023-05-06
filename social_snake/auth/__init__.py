@@ -1,13 +1,16 @@
 from datetime import timedelta, datetime
 from uuid import uuid4, UUID
+from pathlib import Path
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
+from sqlalchemy import delete
 from wtforms import EmailField, StringField, SubmitField, ValidationError
 from wtforms.validators import Email, Length
 from flask_login import login_user
 
-from . import db, models, app, smtp
+from .. import db, app, smtp
+from .models import User, UnverifiedUser, MagicLink
 
 LINK_DURATION = timedelta(hours=2)
 
@@ -25,19 +28,18 @@ class SignUpForm(FlaskForm):
     submit = SubmitField()
 
     def validate_username(self, username):
-        query = db.select(models.User).where(
-            models.User.username == username.data
-        )
+        query = db.select(User).where(User.username == username.data)
 
         if db.session.scalar(query):
             raise ValidationError("This username is already taken!")
 
 
+templates = Path(__file__).parent / "templates"
 auth_bp = Blueprint(
     "auth",
     __name__,
     url_prefix="/auth",
-    template_folder="templates/auth",
+    template_folder=templates,
 )
 
 
@@ -46,19 +48,17 @@ def login():
     form = LoginForm(request.form)
 
     if form.validate_on_submit():
-        query = db.select(models.User).where(
-            models.User.email == form.email.data
-        )
+        query = db.select(User).where(User.email == form.email.data)
         user = db.session.execute(query).scalar()
 
         if user is None:  # User has not registered yet
-            query = db.select(models.UnverifiedUser).where(
-                models.UnverifiedUser.email == form.email.data
+            query = db.select(UnverifiedUser).where(
+                UnverifiedUser.email == form.email.data
             )
             unverified_user = db.session.scalar(query)
 
             if not unverified_user:
-                unverified_user = models.UnverifiedUser()
+                unverified_user = UnverifiedUser()
                 unverified_user.email = form.email.data
                 db.session.add(unverified_user)
 
@@ -90,16 +90,14 @@ def login():
                 f"Registration link has been sent to your email ({form.email.data}).",
                 "success",
             )
-            return redirect(url_for("landing_page"))
+            return redirect(url_for("main.home"))
 
         else:  # User has an account
-            query = db.select(models.MagicLink).where(
-                models.MagicLink.user == user
-            )
+            query = db.select(MagicLink).where(MagicLink.user == user)
             magic_link = db.session.scalar(query)
 
             if not magic_link:
-                magic_link = models.MagicLink()
+                magic_link = MagicLink()
                 magic_link.user = user
                 db.session.add(magic_link)
 
@@ -131,15 +129,15 @@ def login():
                 f"Login link has been sent to your email ({form.email.data}).",
                 "success",
             )
-            return redirect(url_for("landing_page"))
+            return redirect(url_for("main.home"))
 
     return render_template("login.html", form=form)
 
 
 @auth_bp.route("/v-reg/<code>", methods=["GET", "POST"])
 def verify_registration(code: str):
-    query = db.select(models.UnverifiedUser).where(
-        models.UnverifiedUser.url_code == UUID(code)
+    query = db.select(UnverifiedUser).where(
+        UnverifiedUser.url_code == UUID(code)
     )
     unverified_user = db.one_or_404(query)
 
@@ -150,7 +148,7 @@ def verify_registration(code: str):
     form = SignUpForm(request.form)
 
     if form.validate_on_submit():
-        new_user = models.User()
+        new_user = User()
         new_user.username = form.username.data
         new_user.email = unverified_user.email
 
@@ -163,16 +161,14 @@ def verify_registration(code: str):
             f"Welcome, {new_user.username}! Your account was created successfully!",
             "success",
         )
-        return redirect(url_for("landing_page"))
+        return redirect(url_for("main.home"))
 
     return render_template("verify_registration.html", form=form)
 
 
 @auth_bp.get("/v-log/<code>")
 def verify_login(code: str):
-    query = db.select(models.MagicLink).where(
-        models.MagicLink.url_code == UUID(code)
-    )
+    query = db.select(MagicLink).where(MagicLink.url_code == UUID(code))
     magic_link = db.one_or_404(query)
 
     if magic_link.valid_until < datetime.now():
@@ -181,4 +177,8 @@ def verify_login(code: str):
 
     login_user(magic_link.user, remember=True, duration=timedelta(days=1))
     flash(f"Welcome back, {magic_link.user}!", "success")
+
+    db.session.delete(magic_link)
+    db.session.commit()
+
     return redirect("/")

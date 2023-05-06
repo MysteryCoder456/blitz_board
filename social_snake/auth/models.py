@@ -1,7 +1,7 @@
 from typing import Optional
 from flask_login import UserMixin
 
-from . import db, login_manager
+from .. import db, login_manager
 
 
 class User(db.Model, UserMixin):

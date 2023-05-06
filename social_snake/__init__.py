@@ -1,7 +1,7 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, render_template
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
@@ -21,7 +21,6 @@ login_manager = LoginManager(app)
 login_manager.login_view = "auth.login"  # type: ignore
 login_manager.login_message_category = "info"
 
-from . import models
 from .main import main_bp
 from .auth import auth_bp
 
