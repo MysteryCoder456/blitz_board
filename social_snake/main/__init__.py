@@ -2,6 +2,8 @@ from pathlib import Path
 
 from flask import Blueprint, render_template
 
+from .models import Maze
+
 templates = Path(__file__).parent / "templates"
 main_bp = Blueprint("main", __name__, template_folder=templates)
 
