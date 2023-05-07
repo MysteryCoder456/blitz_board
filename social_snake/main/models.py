@@ -9,5 +9,6 @@ class Maze(db.Model):
     date_created = db.Column(db.DateTime(timezone=True), nullable=False)
     difficulty = db.Column(db.Integer, nullable=True)
     maze_data = db.Column(db.JSON, nullable=False)
+    published = db.Column(db.Boolean, nullable=False, default=False)
 
     author = db.relationship(User, back_populates="mazes")
