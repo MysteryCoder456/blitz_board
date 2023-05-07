@@ -4,10 +4,9 @@ from pathlib import Path
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
-from sqlalchemy import delete
 from wtforms import EmailField, StringField, SubmitField, ValidationError
 from wtforms.validators import Email, Length
-from flask_login import login_user
+from flask_login import login_required, login_user, logout_user
 
 from .. import db, app, smtp
 from .models import User, UnverifiedUser, MagicLink
@@ -182,3 +181,11 @@ def verify_login(code: str):
     db.session.commit()
 
     return redirect("/")
+
+
+@auth_bp.get("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out of your account!", "info")
+    return redirect(url_for("main.home"))
