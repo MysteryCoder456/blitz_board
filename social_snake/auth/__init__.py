@@ -15,7 +15,11 @@ LINK_DURATION = timedelta(hours=2)
 
 
 class LoginForm(FlaskForm):
-    email = EmailField(label="Email", validators=[Email()])
+    email = EmailField(
+        label="Email",
+        validators=[Email()],
+        description="user@mail.com",
+    )
     submit = SubmitField()
 
 
@@ -23,10 +27,11 @@ class SignUpForm(FlaskForm):
     username = StringField(
         label="Username",
         validators=[Length(min=3, max=30)],
+        description="John Doe",
     )
     submit = SubmitField()
 
-    def validate_username(self, username):
+    def validate_username(self, username: StringField):
         query = db.select(User).where(User.username == username.data)
 
         if db.session.scalar(query):

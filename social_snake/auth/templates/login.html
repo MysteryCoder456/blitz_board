@@ -13,7 +13,7 @@
 
 <form method="post" class="text-center">
     {{ form.csrf_token }}
-    {{ render_field(form.email, placeholder="user@gmail.com") }}
+    {{ render_field(form.email) }}
     <br>
     {{ form.submit }}
 </form>
