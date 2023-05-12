@@ -3,5 +3,17 @@
 {% block title %}Home{% endblock title %}
 
 {% block main %}
-<h1>Home Page</h1>
+<div class="page-controls">
+    {% for page_num in page.iter_pages() %}
+        {% if page_num %}
+            {% if page_num == page.page %}
+                <span><b>{{ page_num }}</b></span>
+            {% else %}
+                <span>{{ page_num }}</span>
+            {% endif %}
+        {% else %}
+            <span>...</span>
+        {% endif %}
+    {% endfor %}
+</div>
 {% endblock main %}

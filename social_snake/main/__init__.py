@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
@@ -7,7 +7,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, ValidationError
 from wtforms.validators import Length
 
-from .. import db, app
+from .. import db
 from .models import Maze
 
 MAZE_CREATION_COOLDOWN = timedelta(hours=12)
@@ -30,18 +30,21 @@ class CreateMazeForm(FlaskForm):
                 "You must be logged in to create a new maze!"
             )
 
-        with app.app_context():
-            query = db.select(Maze).where(
-                Maze.author == current_user
-                and (request.date - Maze.date_created) < MAZE_CREATION_COOLDOWN
-            )
-            recent_maze = db.session.scalar(query)
+        query = (
+            db.select(Maze)
+            .where(Maze.author == current_user)
+            .order_by(Maze.date_created.desc())
+        )
+        recent_maze = db.session.scalar(query)
 
-            if recent_maze:
-                raise ValidationError(
-                    "You have created a maze just recently. "
-                    "Please try again later..."
-                )
+        if (
+            datetime.now(tz=recent_maze.date_created.tzinfo)
+            - recent_maze.date_created
+        ) < MAZE_CREATION_COOLDOWN:
+            raise ValidationError(
+                "You have created a maze just recently. "
+                "Please try again later..."
+            )
 
 
 templates = Path(__file__).parent / "templates"
@@ -50,7 +53,10 @@ main_bp = Blueprint("main", __name__, template_folder=templates)
 
 @main_bp.get("/")
 def home():
-    return render_template("home.html")
+    query = db.select(Maze).order_by(Maze.date_created.desc())
+    page = db.paginate(query, per_page=20, error_out=False)
+
+    return render_template("home.html", page=page)
 
 
 @main_bp.route("/create", methods=["GET", "POST"])

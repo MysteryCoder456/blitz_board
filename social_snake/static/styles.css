@@ -114,3 +114,14 @@ input[type="submit"] {
   border-color: rgb(var(--selective-yellow));
   background: rgba(var(--selective-yellow), var(--alert-background-opacity));
 }
+
+.page-controls {
+  background: var(--night);
+  border-radius: 8px;
+
+  padding: 7px 15px;
+  margin: 0 auto;
+  text-align: center;
+
+  width: max-content;
+}
