@@ -36,11 +36,9 @@ class CreateMazeForm(FlaskForm):
             .order_by(Maze.date_created.desc())
         )
         recent_maze = db.session.scalar(query)
+        now = datetime.now(tz=recent_maze.date_created.tzinfo)
 
-        if (
-            datetime.now(tz=recent_maze.date_created.tzinfo)
-            - recent_maze.date_created
-        ) < MAZE_CREATION_COOLDOWN:
+        if (now - recent_maze.date_created) < MAZE_CREATION_COOLDOWN:
             raise ValidationError(
                 "You have created a maze just recently. "
                 "Please try again later..."
