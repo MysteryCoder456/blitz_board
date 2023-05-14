@@ -78,3 +78,9 @@ def create_maze():
         return redirect(url_for("main.home"))
 
     return render_template("create_maze.html", form=form)
+
+
+@main_bp.route("/play/<int:maze_id>", methods=["GET"])
+def play_maze(maze_id: int):
+    maze = db.get_or_404(Maze, maze_id)
+    return render_template("play_maze.html", maze=maze)
