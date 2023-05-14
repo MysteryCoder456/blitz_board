@@ -80,7 +80,14 @@ def create_maze():
     return render_template("create_maze.html", form=form)
 
 
-@main_bp.route("/play/<int:maze_id>", methods=["GET"])
+@main_bp.get("/play/<int:maze_id>")
 def play_maze(maze_id: int):
+    # TODO: Implement gameplay
     maze = db.get_or_404(Maze, maze_id)
     return render_template("play_maze.html", maze=maze)
+
+
+@main_bp.route("/editor/<int:maze_id>", methods=["GET", "POST"])
+def maze_editor(maze_id: int):
+    # TODO: Do this
+    return "TODO"

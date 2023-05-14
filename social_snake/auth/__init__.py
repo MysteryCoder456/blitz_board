@@ -194,3 +194,9 @@ def logout():
     logout_user()
     flash("You have been logged out of your account!", "info")
     return redirect(url_for("main.home"))
+
+
+@auth_bp.get("/profile/<int:user_id>")
+def user_profile(user_id: int):
+    # TODO: Do this
+    return "Coming soon"
