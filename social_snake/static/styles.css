@@ -58,6 +58,11 @@ input[type="submit"] {
   cursor: pointer;
 }
 
+canvas {
+  width: 100%;
+  aspect-ratio: calc(16 / 9);
+}
+
 .main-container {
   position: relative;
   top: 50%;
@@ -131,4 +136,15 @@ input[type="submit"] {
   text-align: center;
 
   width: max-content;
+}
+
+.btn {
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 6px;
+  transition: scale 0.1s;
+}
+
+.btn:hover {
+  scale: 107%;
 }

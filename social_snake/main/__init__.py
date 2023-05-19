@@ -88,6 +88,15 @@ def play_maze(maze_id: int):
 
 
 @main_bp.route("/editor/<int:maze_id>", methods=["GET", "POST"])
+@login_required
 def maze_editor(maze_id: int):
-    # TODO: Do this
-    return "TODO"
+    query = db.select(Maze).where(
+        Maze.id == maze_id and Maze.author == current_user
+    )
+    maze = db.first_or_404(query)
+
+    return render_template(
+        "edit_maze.html",
+        maze=maze,
+        editor_script=url_for("static", filename="editor.js"),
+    )

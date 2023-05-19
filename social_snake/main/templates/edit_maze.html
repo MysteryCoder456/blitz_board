@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Editing {{ maze.title }}{% endblock title %}
+
+{% block head %}
+<script defer src="{{ editor_script }}"></script>
+{% endblock head %}
+
+{% block main %}
+<div class="flex justify-between mb-3 mx-3">
+    <btn class="bg-[rgb(var(--red-munsell))] btn">Cancel</btn>
+    <btn class="bg-[rgb(var(--spring-green))] text-[var(--gunmetal)] btn">Save</btn>
+</div>
+
+<canvas width="1920" height="1080"></canvas>
+{% endblock main %}
