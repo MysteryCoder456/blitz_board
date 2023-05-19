@@ -98,5 +98,6 @@ def maze_editor(maze_id: int):
     return render_template(
         "edit_maze.html",
         maze=maze,
+        p5_library=url_for("static", filename="p5.min.js"),
         editor_script=url_for("static", filename="editor.js"),
     )

@@ -1,8 +1,14 @@
 const BLOCK_SIZE = 15;
-let canvas = document.querySelector("canvas");
 
-/** @type CanvasRenderingContext2d */
-let ctx = canvas.getContext("2d");
+function setup() {
+    createCanvas(1920, 1080);
+    select("canvas").removeAttribute("style");
+}
 
-// Clear background
-ctx.fillRect(0, 0, 1920, 1080);
+function draw() {
+    background(0);
+
+    textSize(52);
+    fill(255);
+    text("Hello world", 960, 540);
+}
