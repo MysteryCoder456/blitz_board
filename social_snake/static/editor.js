@@ -45,6 +45,18 @@ function draw() {
 
     noStroke();
 
+    if (mouseIsPressed) {
+        let grid_x = Math.floor(mouseX / BLOCK_SIZE);
+        let grid_y = Math.floor(mouseY / BLOCK_SIZE);
+        let coord_str = grid_x.toString() + "," + grid_y.toString();
+
+        if (mouseButton === LEFT) {
+            blocks[coord_str] = "wall";
+        } else if (mouseButton === RIGHT) {
+            delete blocks[coord_str];
+        }
+    }
+
     for (let b in blocks) {
         let [grid_x, grid_y] = b.split(",").map((a) => int(a));
         let type = blocks[b];
