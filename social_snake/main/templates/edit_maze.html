@@ -3,6 +3,8 @@
 {% block title %}Editing {{ maze.title }}{% endblock title %}
 
 {% block head %}
+<script>let maze_id = {{ maze.id }};</script>
+
 <script src="{{ p5_library }}"></script>
 <script defer src="{{ editor_script }}"></script>
 {% endblock head %}

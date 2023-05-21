@@ -1,7 +1,15 @@
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    url_for,
+)
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, ValidationError
@@ -66,7 +74,6 @@ def create_maze():
         new_maze = Maze()
         new_maze.author = current_user
         new_maze.title = form.title.data
-        new_maze.maze_data = {}
 
         db.session.add(new_maze)
         db.session.commit()
@@ -85,6 +92,12 @@ def play_maze(maze_id: int):
     # TODO: Implement gameplay
     maze = db.get_or_404(Maze, maze_id)
     return render_template("play_maze.html", maze=maze)
+
+
+@main_bp.get("/api/mazedata/<int:maze_id>")
+def maze_data(maze_id: int):
+    maze = db.get_or_404(Maze, maze_id)
+    return jsonify(maze.maze_data)
 
 
 @main_bp.route("/editor/<int:maze_id>", methods=["GET", "POST"])

@@ -12,7 +12,7 @@ class Maze(db.Model):
         default=now(),
     )
     difficulty = db.Column(db.Integer, nullable=True)
-    maze_data = db.Column(db.JSON, nullable=False)
+    maze_data = db.Column(db.JSON, nullable=False, default={"blocks": {}})
     published = db.Column(db.Boolean, nullable=False, default=False)
 
     author = db.relationship("User", back_populates="mazes")

@@ -1,14 +1,25 @@
 const BLOCK_SIZE = 40;
+const GRID_WEIGHT = 2.5;
+
+let blocks = {};
 
 function setup() {
     createCanvas(1280, 720);
     select("canvas").removeAttribute("style");
     cursor(CROSS);
+
+    noLoop();
+    fetch("/api/mazedata/" + maze_id.toString())
+        .then((res) => res.json())
+        .then((data) => {
+            blocks = data.blocks;
+            loop();
+        });
 }
 
 function draw() {
     background(0);
-    strokeWeight(2.5);
+    strokeWeight(GRID_WEIGHT);
 
     // Horizontal Gridlines
     for (let y = 1; y < height / BLOCK_SIZE; y++) {
@@ -30,5 +41,25 @@ function draw() {
         }
 
         line(x * BLOCK_SIZE, 0, x * BLOCK_SIZE, height);
+    }
+
+    noStroke();
+
+    for (let b in blocks) {
+        let [grid_x, grid_y] = b.split(",").map((a) => int(a));
+        let type = blocks[b];
+
+        if (type == "wall") {
+            fill(255);
+        } else if (type == "point") {
+            fill(0, 255, 0);
+        }
+
+        rect(
+            grid_x * BLOCK_SIZE + GRID_WEIGHT / 2,
+            grid_y * BLOCK_SIZE + GRID_WEIGHT / 2,
+            BLOCK_SIZE - GRID_WEIGHT,
+            BLOCK_SIZE - GRID_WEIGHT
+        );
     }
 }
