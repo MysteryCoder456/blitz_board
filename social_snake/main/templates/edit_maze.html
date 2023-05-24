@@ -3,7 +3,10 @@
 {% block title %}Editing {{ maze.title }}{% endblock title %}
 
 {% block head %}
-<script>let maze_id = {{ maze.id }};</script>
+<script>
+    let maze_id = {{ maze.id }};
+    let csrf_token = "{{ form.csrf_token._value() }}";
+</script>
 
 <script src="{{ p5_library }}"></script>
 <script defer src="{{ editor_script }}"></script>
@@ -11,7 +14,7 @@
 
 {% block main %}
 <div class="flex justify-between mb-3 mx-3">
-    <btn class="bg-[rgb(var(--red-munsell))] btn">Cancel</btn>
-    <btn class="bg-[rgb(var(--spring-green))] text-[var(--gunmetal)] btn">Save</btn>
+    <a href="{{ url_for('main.play_maze', maze_id=maze.id) }}" class="bg-[rgb(var(--red-munsell))] btn">Cancel</a>
+    <btn id="save-btn" class="bg-[rgb(var(--spring-green))] text-[var(--gunmetal)] btn">Save</btn>
 </div>
 {% endblock main %}

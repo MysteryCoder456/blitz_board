@@ -4,17 +4,41 @@ const GRID_WEIGHT = 2.5;
 let blocks = {};
 
 function setup() {
-    createCanvas(1280, 720);
-    select("canvas").removeAttribute("style");
-    cursor(CROSS);
+    let cnv = createCanvas(1280, 720);
+    cnv.removeAttribute("style");
+    document
+        .querySelector("canvas")
+        .addEventListener("contextmenu", (event) => event.preventDefault());
 
+    select("#save-btn").mouseClicked(save_maze);
+
+    cursor(CROSS);
     noLoop();
+
     fetch("/api/mazedata/" + maze_id.toString())
         .then((res) => res.json())
         .then((data) => {
             blocks = data.blocks;
             loop();
         });
+}
+
+function save_maze() {
+    // TODO: Send post request to server with new blocks data
+    let new_data = new URLSearchParams();
+    new_data.append(
+        "maze_data",
+        JSON.stringify({
+            blocks: blocks,
+        })
+    );
+    new_data.append("csrf_token", csrf_token);
+    new_data.append("submit", "Save");
+
+    fetch("/editor/" + maze_id, {
+        method: "POST",
+        body: new_data,
+    });
 }
 
 function draw() {

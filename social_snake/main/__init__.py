@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from pathlib import Path
+from json import loads as load_json
 
 from flask import (
     Blueprint,
@@ -23,7 +24,7 @@ MAZE_CREATION_COOLDOWN = timedelta(hours=12)
 
 class CreateMazeForm(FlaskForm):
     title = StringField(
-        "Title",
+        label="Title",
         validators=[Length(min=5, max=80)],
         description="What will your maze be called?",
     )
@@ -51,6 +52,11 @@ class CreateMazeForm(FlaskForm):
                 "You have created a maze just recently. "
                 "Please try again later..."
             )
+
+
+class SaveMazeForm(FlaskForm):
+    maze_data = StringField(label="Maze Data")
+    submit = SubmitField(label="Save")
 
 
 templates = Path(__file__).parent / "templates"
@@ -107,10 +113,17 @@ def maze_editor(maze_id: int):
         Maze.id == maze_id and Maze.author == current_user
     )
     maze = db.first_or_404(query)
+    form = SaveMazeForm(request.form)
+
+    if form.validate_on_submit():
+        maze.maze_data = load_json(form.maze_data.data)
+        db.session.commit()
+        flash("Changes saved successfully!", "success")
 
     return render_template(
         "edit_maze.html",
         maze=maze,
+        form=form,
         p5_library=url_for("static", filename="p5.min.js"),
         editor_script=url_for("static", filename="editor.js"),
     )
