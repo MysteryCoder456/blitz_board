@@ -8,6 +8,7 @@
     --spring-green: 64, 249, 155;
 
     --alert-background-opacity: 0.37;
+    --disabled-opacity: 0.55;
 }
 
 @font-face {
@@ -147,4 +148,9 @@ canvas {
 
 .btn:hover {
     scale: 107%;
+}
+
+.btn-disabled {
+    opacity: var(--disabled-opacity);
+    cursor: not-allowed;
 }

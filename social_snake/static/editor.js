@@ -2,6 +2,8 @@ const BLOCK_SIZE = 40;
 const GRID_WEIGHT = 2.5;
 
 let blocks = {};
+let save_btn;
+let save_alert;
 
 function setup() {
     let cnv = createCanvas(1280, 720);
@@ -10,7 +12,11 @@ function setup() {
         .querySelector("canvas")
         .addEventListener("contextmenu", (event) => event.preventDefault());
 
-    select("#save-btn").mouseClicked(save_maze);
+    save_btn = select("#save-btn");
+    save_btn.mouseClicked(save_maze);
+
+    save_alert = select("#save-alert");
+    save_alert.style("display", "none");
 
     cursor(CROSS);
     noLoop();
@@ -24,7 +30,8 @@ function setup() {
 }
 
 function save_maze() {
-    // TODO: Send post request to server with new blocks data
+    save_btn.addClass("btn-disabled");
+
     let new_data = new URLSearchParams();
     new_data.append(
         "maze_data",
@@ -38,7 +45,16 @@ function save_maze() {
     fetch("/editor/" + maze_id, {
         method: "POST",
         body: new_data,
-    });
+    })
+        .then((res) => res.json())
+        .then((res) => {
+            save_btn.removeClass("btn-disabled");
+            console.log(res);
+
+            if (res) {
+                save_alert.style("display", "block");
+            }
+        });
 }
 
 function draw() {

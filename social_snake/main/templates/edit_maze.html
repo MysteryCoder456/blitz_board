@@ -13,6 +13,10 @@
 {% endblock head %}
 
 {% block main %}
+<div id="save-alert" class="mb-6 text-center alert alert-success">
+    Changes saved successfully!
+</div>
+
 <div class="flex justify-between mb-3 mx-3">
     <a href="{{ url_for('main.play_maze', maze_id=maze.id) }}" class="bg-[rgb(var(--red-munsell))] btn">Cancel</a>
     <btn id="save-btn" class="bg-[rgb(var(--spring-green))] text-[var(--gunmetal)] btn">Save</btn>

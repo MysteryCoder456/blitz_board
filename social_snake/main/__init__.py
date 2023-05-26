@@ -118,7 +118,7 @@ def maze_editor(maze_id: int):
     if form.validate_on_submit():
         maze.maze_data = load_json(form.maze_data.data)
         db.session.commit()
-        flash("Changes saved successfully!", "success")
+        return jsonify(True)
 
     return render_template(
         "edit_maze.html",
