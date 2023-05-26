@@ -97,7 +97,13 @@ def create_maze():
 def play_maze(maze_id: int):
     # TODO: Implement gameplay
     maze = db.get_or_404(Maze, maze_id)
-    return render_template("play_maze.html", maze=maze)
+
+    return render_template(
+        "play_maze.html",
+        maze=maze,
+        p5_library=url_for("static", filename="p5.min.js"),
+        game_script=url_for("static", filename="game.js"),
+    )
 
 
 @main_bp.get("/api/mazedata/<int:maze_id>")

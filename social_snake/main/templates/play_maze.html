@@ -2,6 +2,11 @@
 
 {% block title %}{{ maze.title }}{% endblock title %}
 
-{% block main %}
-<h1>Coming soon...</h1>
-{% endblock main %}
+{% block head %}
+<script>
+    let maze_id = {{ maze.id }};
+</script>
+
+<script src="{{ p5_library }}"></script>
+<script defer src="{{ game_script }}"></script>
+{% endblock head %}
