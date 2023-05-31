@@ -1,6 +1,7 @@
 const BLOCK_SIZE = 40;
 const GRID_WEIGHT = 2.5;
 
+let spawn_point = null;
 let blocks = {};
 let save_btn;
 let save_alert;
@@ -24,6 +25,7 @@ function setup() {
     fetch("/api/mazedata/" + maze_id.toString())
         .then((res) => res.json())
         .then((data) => {
+            spawn_point = data.spawn_point;
             blocks = data.blocks;
             loop();
         });
@@ -36,6 +38,7 @@ function save_maze() {
     new_data.append(
         "maze_data",
         JSON.stringify({
+            spawn_point: spawn_point,
             blocks: blocks,
         })
     );
@@ -49,7 +52,6 @@ function save_maze() {
         .then((res) => res.json())
         .then((res) => {
             save_btn.removeClass("btn-disabled");
-            console.log(res);
 
             if (res) {
                 save_alert.style("display", "block");
@@ -92,7 +94,18 @@ function draw() {
 
         if (mouseButton === LEFT) {
             blocks[coord_str] = "wall";
+
+            if (
+                spawn_point != null &&
+                spawn_point[0] == grid_x &&
+                spawn_point[1] == grid_y
+            ) {
+                spawn_point = null;
+            }
         } else if (mouseButton === RIGHT) {
+            delete blocks[coord_str];
+        } else if (mouseButton === CENTER) {
+            spawn_point = [grid_x, grid_y];
             delete blocks[coord_str];
         }
     }
@@ -110,6 +123,16 @@ function draw() {
         rect(
             grid_x * BLOCK_SIZE + GRID_WEIGHT / 2,
             grid_y * BLOCK_SIZE + GRID_WEIGHT / 2,
+            BLOCK_SIZE - GRID_WEIGHT,
+            BLOCK_SIZE - GRID_WEIGHT
+        );
+    }
+
+    if (spawn_point != null) {
+        fill(0, 255, 0);
+        rect(
+            spawn_point[0] * BLOCK_SIZE + GRID_WEIGHT / 2,
+            spawn_point[1] * BLOCK_SIZE + GRID_WEIGHT / 2,
             BLOCK_SIZE - GRID_WEIGHT,
             BLOCK_SIZE - GRID_WEIGHT
         );
