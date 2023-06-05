@@ -110,6 +110,7 @@ function draw() {
         }
     }
 
+    // Draw Walls
     for (let b in blocks) {
         let [grid_x, grid_y] = b.split(",").map((a) => int(a));
         let type = blocks[b];

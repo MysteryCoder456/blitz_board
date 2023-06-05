@@ -3,6 +3,10 @@ const GRID_WEIGHT = 2.5;
 
 let blocks = {};
 
+let head = [-1, -1];
+let tail = [];
+let dir = [1, 0];
+
 function setup() {
     let cnv = createCanvas(1280, 720);
     cnv.removeAttribute("style");
@@ -16,12 +20,30 @@ function setup() {
     fetch("/api/mazedata/" + maze_id.toString())
         .then((res) => res.json())
         .then((data) => {
+            head = data.spawn_point;
             blocks = data.blocks;
             loop();
         });
 }
 
+function keyPressed() {
+    if (keyCode == 87 && dir[1] != 1) {
+        dir = [0, -1];
+    } else if (keyCode == 83 && dir[1] != -1) {
+        dir = [0, 1];
+    } else if (keyCode == 68 && dir[0] != -1) {
+        dir = [1, 0];
+    } else if (keyCode == 65 && dir[0] != 1) {
+        dir = [-1, 0];
+    }
+}
+
 function draw() {
+    if (frameCount % (getTargetFrameRate() * 0.25) == 0) {
+        head[0] += dir[0];
+        head[1] += dir[1];
+    }
+
     background(0);
     strokeWeight(GRID_WEIGHT);
 
@@ -49,6 +71,7 @@ function draw() {
 
     noStroke();
 
+    // Draw Walls
     for (let b in blocks) {
         let [grid_x, grid_y] = b.split(",").map((a) => int(a));
         let type = blocks[b];
@@ -66,4 +89,13 @@ function draw() {
             BLOCK_SIZE - GRID_WEIGHT
         );
     }
+
+    // Draw Player
+    fill(46, 101, 210);
+    rect(
+        head[0] * BLOCK_SIZE + GRID_WEIGHT / 2,
+        head[1] * BLOCK_SIZE + GRID_WEIGHT / 2,
+        BLOCK_SIZE - GRID_WEIGHT,
+        BLOCK_SIZE - GRID_WEIGHT
+    );
 }
