@@ -3,47 +3,5 @@
 {% block title %}Home{% endblock title %}
 
 {% block main %}
-
-{% for maze in page %}
-    <div class="maze flex" id="maze-{{maze.id}}">
-        <div class="flex-1">
-            <h1 class="text-xl">{{ maze.title }}</h1>
-
-            <span class="text-slate-500 text-base">
-                Create by <i>{{ maze.author.username }}</i> on {{ maze.date_created.strftime("%d %b %Y") }}
-            </span>
-
-            <br>
-
-            <span class="text-slate-500 text-base">
-            {% if maze.difficulty %}
-                Difficulty: {{ maze.difficulty }} / 5
-            {% endif  %}
-                Difficulty: N/A
-            </span>
-        </div>
-
-        <a
-            href="{{ url_for('main.play_maze', maze_id=maze.id) }}"
-            class="me-6 my-auto bg-zinc-700 btn"
-        >
-            Play
-        </a>
-    </div>
-{% endfor %}
-
-<div class="page-controls mt-5">
-    {% for page_num in page.iter_pages() %}
-        {% if page_num %}
-            {% if page_num == page.page %}
-                <span><b>{{ page_num }}</b></span>
-            {% else %}
-                <span class="text-slate-500">{{ page_num }}</span>
-            {% endif %}
-        {% else %}
-            <span>...</span>
-        {% endif %}
-    {% endfor %}
-</div>
-
+<h1>Yea idk wtf im doing bro</h1>
 {% endblock main %}
