@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>{% block title %}Example Title{% endblock title %} - Social Snake</title>
+    <title>{% block title %}Example Title{% endblock title %} - Blitz Board</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css' ) }}">
@@ -16,7 +16,7 @@
 <body>
     <nav class="fixed xl:px-52 lg:px-28 md:px-10 sm:px-6 py-4 grid justify-between">
         <div class="row-start-1">
-            <a class="site-name text-xl me-5" href="{{ url_for('main.home') }}">Social Snake</a>
+            <a class="site-name text-xl me-5" href="{{ url_for('main.home') }}">Blitz Board</a>
             <a class="nav-link text-xl" href="{{ url_for('main.home') }}">Home</a>
             <a class="nav-link text-xl" href="#">Leaderboards</a>
         </div>
