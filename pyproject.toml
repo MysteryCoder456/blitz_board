@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "social-snake"
+name = "blitz_board"
 version = "0.1.0"
-description = "Puzzle Haven"
+description = "Keyboard Warrior Haven"
 authors = ["Rehatbir Singh <rehatbir.singh@gmail.com>"]
 readme = "README.md"
-packages = [{include = "social_snake"}]
+packages = [{include = "blitz_board"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -23,7 +23,7 @@ ruff = "^0.0.262"
 alembic = "^1.10.4"
 
 [tool.poetry.scripts]
-start = "social_snake:run"
+start = "blitz_board:run"
 
 [tool.ruff]
 ignore = ["E402"]

@@ -11,8 +11,6 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
 
-    mazes = db.relationship("Maze", back_populates="author")
-
     def __str__(self):
         return self.username
 
