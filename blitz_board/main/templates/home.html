@@ -8,7 +8,7 @@
 
 <form method="post" class="text-center" id="join-form">
     {{ form.csrf_token }}
-    
+
     {% if not current_user.is_authenticated %}
         {{ render_field(form.username) }}
     {% endif %}
