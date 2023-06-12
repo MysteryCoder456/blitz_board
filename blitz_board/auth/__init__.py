@@ -4,7 +4,12 @@ from pathlib import Path
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
-from wtforms import EmailField, StringField, SubmitField, ValidationError
+from wtforms import ValidationError
+from wtforms.fields import (
+    EmailField,
+    StringField,
+    SubmitField,
+)
 from wtforms.validators import Email, Length
 from flask_login import login_required, login_user, logout_user
 
