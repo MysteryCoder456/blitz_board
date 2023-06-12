@@ -1,5 +1,5 @@
 from pathlib import Path
-from flask import Blueprint, render_template
+from flask import Blueprint, redirect, render_template, url_for
 
 templates = Path(__file__).parent / "templates"
 game_bp = Blueprint(
@@ -8,6 +8,12 @@ game_bp = Blueprint(
     url_prefix="/game",
     template_folder=templates,
 )
+
+
+@game_bp.route("/joinrandom")
+def join_random():
+    # TODO: Do this
+    return redirect(url_for("main.home"))
 
 
 @game_bp.route("/join/<game_id>")

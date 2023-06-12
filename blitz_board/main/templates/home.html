@@ -8,6 +8,11 @@
 
 <form method="post" class="text-center" id="join-form">
     {{ form.csrf_token }}
+    
+    {% if not current_user.is_authenticated %}
+        {{ render_field(form.username) }}
+    {% endif %}
+
     {{ render_field(form.game_id) }}
     <input name="submit" type="hidden" />
 
@@ -15,6 +20,9 @@
         <button id="submit-btn" class="btn bg-[rgb(var(--spring-green))]">
             Join Game
         </button>
+        <a href="{{ url_for('game.join_random') }}" class="btn bg-[rgb(var(--selective-yellow))]">
+            Join Random
+        </a>
         <a href="{{ url_for('game.create_game') }}" class="btn bg-[rgb(var(--selective-yellow))]">
             Create Game
         </a>
