@@ -2,14 +2,20 @@ from pathlib import Path
 
 from flask import (
     Blueprint,
+    flash,
+    redirect,
     render_template,
     request,
+    url_for,
+    session,
 )
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import ValidationError
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import Length
+
+from ..game import Player, games
 
 
 class JoinGameForm(FlaskForm):
@@ -32,6 +38,10 @@ class JoinGameForm(FlaskForm):
                 "Username must be at least 3 characters long."
             )
 
+    def validate_game_id(self, game_id: StringField):
+        if not game_id.data.isnumeric():
+            raise ValidationError("Game Code must be a 5-digit number.")
+
 
 templates = Path(__file__).parent / "templates"
 main_bp = Blueprint("main", __name__, template_folder=templates)
@@ -42,9 +52,24 @@ def home():
     form = JoinGameForm(request.form)
 
     if form.validate_on_submit():
-        if current_user.is_authenticated:  # type: ignore
-            form.username.data = current_user.username  # type: ignore
+        game_id = int(form.game_id.data)
+        user_id = None
+        username = form.username.data
 
-        # TODO: Do this
+        if current_user.is_authenticated:  # type: ignore
+            user_id = current_user.id  # type: ignore
+            username = current_user.username  # type: ignore
+
+        if game := games.get(game_id):
+            player_id = game.next_player_id
+            session["my_id"] = player_id
+
+            game.players[player_id] = Player(user_id, username)
+            game.next_player_id += 1
+
+            return redirect(url_for("game.join_game", game_id=game_id))
+
+        else:
+            flash("The requested game does not exist!", "warning")
 
     return render_template("home.html", form=form)

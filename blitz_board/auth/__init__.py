@@ -175,7 +175,7 @@ def verify_registration(code: str):
     return render_template("verify_registration.html", form=form)
 
 
-@auth_bp.get("/v-log/<code>")
+@auth_bp.route("/v-log/<code>")
 def verify_login(code: str):
     query = db.select(MagicLink).where(MagicLink.url_code == UUID(code))
     magic_link = db.one_or_404(query)
@@ -193,7 +193,7 @@ def verify_login(code: str):
     return redirect("/")
 
 
-@auth_bp.get("/logout")
+@auth_bp.route("/logout")
 @login_required
 def logout():
     logout_user()
@@ -201,7 +201,7 @@ def logout():
     return redirect(url_for("main.home"))
 
 
-@auth_bp.get("/profile/<int:user_id>")
+@auth_bp.route("/profile/<int:user_id>")
 def user_profile(user_id: int):
     # TODO: Do this
     return "Coming soon"
