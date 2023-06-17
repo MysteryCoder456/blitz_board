@@ -16,6 +16,7 @@ flask = "^2.3.2"
 flask-sqlalchemy = "^3.0.3"
 flask-wtf = "^1.1.1"
 yagmail = "^0.15.293"
+flask-sock = "^0.6.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"

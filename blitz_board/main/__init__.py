@@ -11,9 +11,6 @@ from wtforms import ValidationError
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import Length
 
-templates = Path(__file__).parent / "templates"
-main_bp = Blueprint("main", __name__, template_folder=templates)
-
 
 class JoinGameForm(FlaskForm):
     username = StringField(label="Username", description="John Doe")
@@ -34,6 +31,10 @@ class JoinGameForm(FlaskForm):
             raise ValidationError(
                 "Username must be at least 3 characters long."
             )
+
+
+templates = Path(__file__).parent / "templates"
+main_bp = Blueprint("main", __name__, template_folder=templates)
 
 
 @main_bp.route("/", methods=["GET", "POST"])
