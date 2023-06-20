@@ -67,7 +67,7 @@ def home():
             game.players[player_id] = Player(user_id, username)
             game.next_player_id += 1
 
-            return redirect(url_for("game.join_game", game_id=game_id))
+            return redirect(url_for("game.play_game", game_id=game_id))
 
         else:
             flash("The requested game does not exist!", "warning")

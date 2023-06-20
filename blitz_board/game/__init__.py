@@ -62,17 +62,20 @@ def join_random():
     return redirect(url_for("main.home"))
 
 
-@game_bp.route("/join/<game_id>")
-def join_game(game_id: int):
+@game_bp.route("/play/<int:game_id>")
+def play_game(game_id: int):
+    game_room: GameSession | None = games.get(game_id)
     player_id: int | None = session.get("my_id")
 
-    if player_id not in games[game_id].players:
+    if not game_room:
+        flash("The requested game was not found!", "error")
+        return redirect(url_for("main.home"))
+
+    if player_id not in game_room.players:
         flash("Unable to join this game!", "error")
         return redirect(url_for("main.home"))
 
-    # TODO: Do this
-
-    return render_template("join_game.html")
+    return render_template("play_game.html", player_id=player_id)
 
 
 @game_bp.route("/new", methods=["GET", "POST"])
@@ -113,6 +116,6 @@ def create_game():
         )
         new_game.next_player_id += 1
 
-        return redirect(url_for("game.join_game", game_id=game_id))
+        return redirect(url_for("game.play_game", game_id=game_id))
 
     return render_template("create_game.html", form=form)

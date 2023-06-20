@@ -4,17 +4,17 @@
 {% block title %}Verify Registration{% endblock title %}
 
 {% block main %}
-<div class="text-center">
-    <h1 class="text-2xl">Create your account</h1>
-    <p>Let's create an account for you!</p>
-</div>
+    <div class="text-center">
+        <h1 class="text-2xl">Create your account</h1>
+        <p>Let's create an account for you!</p>
+    </div>
 
-<br>
-
-<form method="post" class="text-center">
-    {{ form.csrf_token }}
-    {{ render_field(form.username) }}
     <br>
-    {{ form.submit }}
-</form>
+
+    <form method="post" class="text-center">
+        {{ form.csrf_token }}
+        {{ render_field(form.username) }}
+        <br>
+        {{ form.submit }}
+    </form>
 {% endblock main %}
