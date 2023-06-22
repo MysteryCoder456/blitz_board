@@ -4,6 +4,21 @@
     Playing Game
 {% endblock title %}
 
+{% block head %}
+    <script>
+        let myID = {{ player_id }};
+        let gameID = {{ game_id }};
+    </script>
+{% endblock head %}
+
 {% block main %}
-    <h1 align="center">Coming Soon...</h1>
+    <div id="player-list">
+    </div>
+
+    <div id="typing-area">
+    </div>
 {% endblock main %}
+
+{% block bodyend %}
+    <script src="{{ play_script }}"></script>
+{% endblock bodyend %}

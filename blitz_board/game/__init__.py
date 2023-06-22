@@ -1,6 +1,8 @@
 from pathlib import Path
 from dataclasses import dataclass, field
 from random import randint
+from time import time
+from json import loads as parse_json, dumps as to_json
 
 from flask import (
     Blueprint,
@@ -31,7 +33,6 @@ class GameSession:
     game_id: int
     private: bool
     host_id: int
-    next_player_id: int = field(default=1)
     players: dict[int, Player] = field(default_factory=dict)
 
 
@@ -52,8 +53,28 @@ games: dict[int, GameSession] = {}
 
 @web_sock.route("/ws", bp=game_bp)
 def game_ws(ws: Server):
-    # TODO: Do this
-    ...
+    initial_data = parse_json(ws.receive())  # type: ignore
+    my_id = initial_data["player_id"]
+
+    game_room: GameSession | None = games.get(initial_data["game_id"])
+
+    if not game_room or initial_data["player_id"] not in game_room.players:
+        # Information is invalid
+        ws.close()
+        return
+
+    # Copy socket player socket to player roster
+    game_room.players[my_id].ws = ws
+
+    player_data = [
+        {
+            "player_id": player_id,
+            "permanent_id": player.permanent_id,
+            "username": player.username,
+        }
+        for player_id, player in game_room.players.items()
+    ]
+    ws.send(player_data)
 
 
 @game_bp.route("/joinrandom")
@@ -75,7 +96,12 @@ def play_game(game_id: int):
         flash("Unable to join this game!", "error")
         return redirect(url_for("main.home"))
 
-    return render_template("play_game.html", player_id=player_id)
+    return render_template(
+        "play_game.html",
+        player_id=player_id,
+        game_id=game_id,
+        play_script=url_for("static", filename="js/play.js"),
+    )
 
 
 @game_bp.route("/new", methods=["GET", "POST"])
@@ -107,14 +133,13 @@ def create_game():
         )
         games[game_id] = new_game
 
-        player_id = new_game.next_player_id
+        player_id = int(time() * 1000)
         session["my_id"] = player_id
 
         new_game.host_id = player_id
         new_game.players[player_id] = Player(
             current_user.id, current_user.username  # type: ignore
         )
-        new_game.next_player_id += 1
 
         return redirect(url_for("game.play_game", game_id=game_id))
 

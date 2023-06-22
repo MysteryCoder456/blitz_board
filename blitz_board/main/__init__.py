@@ -1,4 +1,5 @@
 from pathlib import Path
+from time import time
 
 from flask import (
     Blueprint,
@@ -61,11 +62,10 @@ def home():
             username = current_user.username  # type: ignore
 
         if game := games.get(game_id):
-            player_id = game.next_player_id
+            player_id = int(time() * 1000)
             session["my_id"] = player_id
 
             game.players[player_id] = Player(user_id, username)
-            game.next_player_id += 1
 
             return redirect(url_for("game.play_game", game_id=game_id))
 
