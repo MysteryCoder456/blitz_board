@@ -74,7 +74,7 @@ def game_ws(ws: Server):
         }
         for player_id, player in game_room.players.items()
     ]
-    ws.send(player_data)
+    ws.send(to_json(player_data))
 
 
 @game_bp.route("/joinrandom")
@@ -101,6 +101,7 @@ def play_game(game_id: int):
         player_id=player_id,
         game_id=game_id,
         play_script=url_for("static", filename="js/play.js"),
+        default_pfp=url_for("static", filename="images/default-pfp.jpg"),
     )
 
 

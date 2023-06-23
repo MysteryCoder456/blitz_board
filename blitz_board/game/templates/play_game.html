@@ -6,13 +6,21 @@
 
 {% block head %}
     <script>
-        let myID = {{ player_id }};
-        let gameID = {{ game_id }};
+        const myID = {{ player_id }};
+        const gameID = {{ game_id }};
     </script>
 {% endblock head %}
 
 {% block main %}
-    <div id="player-list">
+    <template id="player-card-template">
+        <div class="player-card grid grid-cols-10 items-center gap-2" id="player-card-0">
+            <img src="{{ default_pfp }}" alt="Profile Picture" width=45 height=45 class="rounded-full" />
+            <p class="player-name col-span-3 truncate">Username</p>
+            <progress class="player-progress col-span-6 h-2 rounded" max=100 value=0 />
+        </div>
+    </template>
+
+    <div id="player-list" class="mx-8 flex flex-col gap-3">
     </div>
 
     <div id="typing-area">
