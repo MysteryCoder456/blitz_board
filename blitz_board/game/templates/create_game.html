@@ -13,6 +13,7 @@
 
     <form method="post" class="text-center">
         {{ form.csrf_token }}
+        {{ render_field(form.word_count) }}
         {{ render_field(form.private) }}
         <br>
         {{ form.submit }}

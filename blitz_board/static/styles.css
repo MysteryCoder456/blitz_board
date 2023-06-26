@@ -154,3 +154,7 @@ canvas {
     opacity: var(--disabled-opacity);
     cursor: not-allowed;
 }
+
+#typing-area {
+    user-select: none;
+}

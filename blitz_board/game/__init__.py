@@ -1,6 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass, field
-from random import randint
+from random import randint, choices
 from time import time
 from json import loads as parse_json, dumps as to_json
 
@@ -16,9 +16,24 @@ from flask import (
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from simple_websocket.ws import Server
-from wtforms.fields import BooleanField, SubmitField
+from wtforms.fields import BooleanField, IntegerField, SubmitField
+from wtforms.validators import NumberRange
+from english_words import get_english_words_set
 
 from blitz_board import web_sock
+
+
+def generate_random_sentence(word_count: int) -> str:
+    """
+    Generates a sentence with completely random words that make no sense.
+
+    @param word_count: How many words the sentence must have.
+    @returns: The random sentence generated.
+    """
+
+    word_set = get_english_words_set(["gcide"], lower=True)
+    words = choices(list(word_set), k=word_count)
+    return " ".join(words)
 
 
 @dataclass
@@ -33,10 +48,16 @@ class GameSession:
     game_id: int
     private: bool
     host_id: int
+    test_sentence: str
     players: dict[int, Player] = field(default_factory=dict)
 
 
 class CreateRoomForm(FlaskForm):
+    word_count = IntegerField(
+        label="Word Count",
+        validators=[NumberRange(min=5)],
+        default=15,
+    )
     private = BooleanField(label="Private Game?")
     submit = SubmitField(label="Create")
 
@@ -99,7 +120,7 @@ def play_game(game_id: int):
     return render_template(
         "play_game.html",
         player_id=player_id,
-        game_id=game_id,
+        game=game_room,
         play_script=url_for("static", filename="js/play.js"),
         default_pfp=url_for("static", filename="images/default-pfp.jpg"),
     )
@@ -127,15 +148,17 @@ def create_game():
             )
             return redirect(url_for("game.create_game"))
 
-        new_game = GameSession(
-            game_id,
-            form.private.data,
-            current_user.id,  # type: ignore
-        )
-        games[game_id] = new_game
-
         player_id = int(time() * 1000)
         session["my_id"] = player_id
+
+        new_game = GameSession(
+            game_id=game_id,
+            private=form.private.data,
+            host_id=player_id,
+            test_sentence=generate_random_sentence(form.word_count.data),
+        )
+        games[game_id] = new_game
+        print(new_game)
 
         new_game.host_id = player_id
         new_game.players[player_id] = Player(
