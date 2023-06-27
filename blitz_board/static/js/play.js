@@ -1,13 +1,12 @@
 const playerCardTemplate = document.querySelector("#player-card-template");
 const playerList = document.querySelector("#player-list");
 
-let proto = "wss:";
-
-if (document.location.protocol === "http:") {
-    proto = "ws:";
-}
-
-const ws = new WebSocket(`${proto}//${document.location.host}/game/ws`);
+const socket = io({
+    auth: {
+        player_id: myID,
+        game_id: gameID,
+    },
+});
 
 function createPlayerCard(playerData) {
     const newCard = playerCardTemplate.content.cloneNode(true);
@@ -23,42 +22,22 @@ function createPlayerCard(playerData) {
     return newCard;
 }
 
-ws.onopen = (_ev) => {
-    const initial_data = {
-        player_id: myID,
-        game_id: gameID,
-    };
-    ws.send(JSON.stringify(initial_data));
-};
+socket.on("player list", (players) => {
+    // Creating player cards for each player
+    players.forEach((playerData) => {
+        const card = createPlayerCard(playerData);
+        playerList.appendChild(card);
+    });
+});
 
-ws.onmessage = (ev) => {
-    const parsedMsg = JSON.parse(ev.data);
+socket.on("player join", (player) => {
+    // Create player card for new player
+    const card = createPlayerCard(player);
+    playerList.appendChild(card);
+});
 
-    switch (parsedMsg.msg_type) {
-        case "player_list": {
-            // Creating player cards for each player
-            parsedMsg.data.forEach((playerData) => {
-                const card = createPlayerCard(playerData);
-                playerList.appendChild(card);
-            });
-            break;
-        }
-
-        case "new_player": {
-            const card = createPlayerCard(parsedMsg.data);
-            playerList.appendChild(card);
-            break;
-        }
-
-        case "player_left": {
-            const card = playerList.querySelector(
-                `#player-card-${parsedMsg.data}`,
-            );
-            card.remove();
-            break;
-        }
-
-        default:
-            break;
-    }
-};
+socket.on("player leave", (playerId) => {
+    // Remove corresponding player card
+    const card = playerList.querySelector(`#player-card-${playerId}`);
+    card.remove();
+});

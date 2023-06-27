@@ -20,6 +20,22 @@ typing-extensions = ">=4"
 tz = ["python-dateutil"]
 
 [[package]]
+name = "bidict"
+version = "0.22.1"
+description = "The bidirectional mapping library for Python."
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "bidict-0.22.1-py3-none-any.whl", hash = "sha256:6ef212238eb884b664f28da76f33f1d28b260f665fc737b413b287d5487d1e7b"},
+    {file = "bidict-0.22.1.tar.gz", hash = "sha256:1e0f7f74e4860e6d0943a05d4134c63a2fad86f3d4732fb265bd79e4e856d81d"},
+]
+
+[package.extras]
+docs = ["furo", "sphinx", "sphinx-copybutton"]
+lint = ["pre-commit"]
+test = ["hypothesis", "pytest", "pytest-benchmark[histogram]", "pytest-cov", "pytest-xdist", "sortedcollections", "sortedcontainers", "sphinx"]
+
+[[package]]
 name = "black"
 version = "23.3.0"
 description = "The uncompromising code formatter."
@@ -317,19 +333,19 @@ Flask = ">=1.0.4"
 Werkzeug = ">=1.0.1"
 
 [[package]]
-name = "flask-sock"
-version = "0.6.0"
-description = "WebSocket support for Flask"
+name = "flask-socketio"
+version = "5.3.4"
+description = "Socket.IO integration for Flask applications"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "flask-sock-0.6.0.tar.gz", hash = "sha256:435cf81bb497ac7622cd1dda554fbfa3e369e629daea0a1d21b73a24f1bd6229"},
-    {file = "flask_sock-0.6.0-py3-none-any.whl", hash = "sha256:593fffb186928080a5b5b03d717efc56dac2d5ed690ce6bfff333b3597a2f518"},
+    {file = "Flask-SocketIO-5.3.4.tar.gz", hash = "sha256:1cbd379c9bf68ac37bcc4750d01708922fa6365d13a5447d3f8893792879410c"},
+    {file = "Flask_SocketIO-5.3.4-py3-none-any.whl", hash = "sha256:564acfb24dcc9545cdae536cde0323653d9b547069a925f11eeb132338aa71c0"},
 ]
 
 [package.dependencies]
-flask = ">=2"
-simple-websocket = ">=0.5.1"
+Flask = ">=0.9"
+python-socketio = ">=5.0.2"
 
 [[package]]
 name = "flask-sqlalchemy"
@@ -765,6 +781,40 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-engineio"
+version = "4.4.1"
+description = "Engine.IO server and client for Python"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "python-engineio-4.4.1.tar.gz", hash = "sha256:eb3663ecb300195926b526386f712dff84cd092c818fb7b62eeeda9160120c29"},
+    {file = "python_engineio-4.4.1-py3-none-any.whl", hash = "sha256:28ab67f94cba2e5f598cbb04428138fd6bb8b06d3478c939412da445f24f0773"},
+]
+
+[package.extras]
+asyncio-client = ["aiohttp (>=3.4)"]
+client = ["requests (>=2.21.0)", "websocket-client (>=0.54.0)"]
+
+[[package]]
+name = "python-socketio"
+version = "5.8.0"
+description = "Socket.IO server and client for Python"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "python-socketio-5.8.0.tar.gz", hash = "sha256:e714f4dddfaaa0cb0e37a1e2deef2bb60590a5b9fea9c343dd8ca5e688416fd9"},
+    {file = "python_socketio-5.8.0-py3-none-any.whl", hash = "sha256:7adb8867aac1c2929b9c1429f1c02e12ca4c36b67c807967393e367dfbb01441"},
+]
+
+[package.dependencies]
+bidict = ">=0.21.0"
+python-engineio = ">=4.3.0"
+
+[package.extras]
+asyncio-client = ["aiohttp (>=3.4)"]
+client = ["requests (>=2.21.0)", "websocket-client (>=0.54.0)"]
+
+[[package]]
 name = "requests"
 version = "2.31.0"
 description = "Python HTTP for Humans."
@@ -1000,4 +1050,4 @@ dkim = ["dkimpy"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "95c78c64b32aa4eb404c70624d7039d48681b020d91770204e7b3fc66879fceb"
+content-hash = "cd0bc3c612ee111275e72b3c35af7ef500f77c78cd1ba5ccd814ceb0bc204098"

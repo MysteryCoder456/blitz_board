@@ -64,8 +64,12 @@ def home():
         if game := games.get(game_id):
             player_id = int(time() * 1000)
             session["my_id"] = player_id
+            session["game_id"] = game_id
 
-            game.players[player_id] = Player(user_id, username)
+            game.players[player_id] = Player(
+                permanent_id=user_id,
+                username=username,
+            )
 
             return redirect(url_for("game.play_game", game_id=game_id))
 

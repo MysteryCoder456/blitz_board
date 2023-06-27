@@ -2,7 +2,6 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from random import randint, choices
 from time import time
-from json import loads as parse_json, dumps as to_json
 
 from flask import (
     Blueprint,
@@ -15,12 +14,12 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
-from simple_websocket.ws import Server
+from flask_socketio import emit, join_room, rooms
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 from english_words import get_english_words_set
 
-from blitz_board import web_sock
+from blitz_board import socketio
 
 
 def generate_random_sentence(word_count: int) -> str:
@@ -40,7 +39,7 @@ def generate_random_sentence(word_count: int) -> str:
 class Player:
     permanent_id: int | None
     username: str
-    ws: Server | None = field(default=None)
+    session_id: str | None = field(default=None)
 
 
 @dataclass
@@ -73,43 +72,36 @@ game_bp = Blueprint(
 games: dict[int, GameSession] = {}
 
 
-@web_sock.route("/ws", bp=game_bp)
-def game_ws(ws: Server):
-    initial_data = parse_json(ws.receive())  # type: ignore
-    my_id = initial_data["player_id"]
-
-    game_room: GameSession | None = games.get(initial_data["game_id"])
+@socketio.on("connect")
+def socket_connect(auth: dict):
+    player_id = auth["player_id"]
+    game_id = auth["game_id"]
+    game_room: GameSession | None = games.get(game_id)
 
     if (
         not game_room
-        or initial_data["player_id"] not in game_room.players
+        or player_id not in game_room.players
         or game_room.started
     ):
-        # Information is invalid
-        ws.close()
-        return
+        return False
+
+    player = game_room.players[player_id]
+    player.session_id = request.sid  # type: ignore
 
     # Notify existing players about new player
-    me = game_room.players[my_id]
-    new_player_msg = to_json(
+    emit(
+        "player join",
         {
-            "msg_type": "new_player",
-            "data": {
-                "player_id": my_id,
-                "permanent_id": me.permanent_id,
-                "username": me.username,
-            },
-        }
+            "player_id": player_id,
+            "permanent_id": player.permanent_id,
+            "username": player.username,
+        },
+        to=game_id,
     )
 
-    for p in game_room.players.values():
-        if sock := p.ws:
-            sock.send(new_player_msg)
-
-    # Copy socket player socket to player roster
-    game_room.players[my_id].ws = ws
-
-    player_data = [
+    # Notify new player about existing players
+    join_room(game_id)
+    player_list = [
         {
             "player_id": player_id,
             "permanent_id": player.permanent_id,
@@ -117,31 +109,21 @@ def game_ws(ws: Server):
         }
         for player_id, player in game_room.players.items()
     ]
-    ws.send(to_json({"msg_type": "player_list", "data": player_data}))
+    emit("player list", player_list)
 
-    while True:
-        try:
-            msg = ws.receive()
-        except ConnectionError:
-            # Client has disconnected
-            # FIXME: does not detect player disconnection
 
-            del game_room.players[my_id]
-            player_left_msg = to_json(
-                {
-                    "msg_type": "player_left",
-                    "data": my_id,
-                }
-            )
+@socketio.on("disconnect")
+def socket_disconnect():
+    player_room = session["game_id"]
+    player_id: int | None = None
 
-            for p in game_room.players.values():
-                if sock := p.ws:
-                    sock.send(player_left_msg)
+    for p_id, p in games[player_room].players.items():
+        if p.session_id == request.sid:  # type: ignore
+            player_id = p_id
 
-            return
-
-        print(msg)
-        # TODO: Gameplay
+    if player_id:
+        del games[player_room].players[player_id]
+        emit("player leave", player_id, to=player_room)
 
 
 @game_bp.route("/joinrandom")
@@ -197,6 +179,7 @@ def create_game():
 
         player_id = int(time() * 1000)
         session["my_id"] = player_id
+        session["game_id"] = game_id
 
         new_game = GameSession(
             game_id=game_id,
@@ -205,11 +188,11 @@ def create_game():
             test_sentence=generate_random_sentence(form.word_count.data),
         )
         games[game_id] = new_game
-        print(new_game)
 
         new_game.host_id = player_id
         new_game.players[player_id] = Player(
-            current_user.id, current_user.username  # type: ignore
+            permanent_id=current_user.id,  # type: ignore
+            username=current_user.username,  # type: ignore
         )
 
         return redirect(url_for("game.play_game", game_id=game_id))
