@@ -14,7 +14,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
-from flask_socketio import emit, join_room, rooms
+from flask_socketio import emit, join_room
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 from english_words import get_english_words_set
