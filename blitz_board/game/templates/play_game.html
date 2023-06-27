@@ -5,6 +5,7 @@
 {% endblock title %}
 
 {% block head %}
+    <script src="{{ socket_io }}"></script>
     <script>
         const myID = {{ player_id }};
         const gameID = {{ game.game_id }};

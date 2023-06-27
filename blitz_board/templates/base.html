@@ -7,7 +7,7 @@
 
         <title>{% block title %}Example Title{% endblock title %} - Blitz Board</title>
 
-        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="{{ url_for('static', filename='js/tailwind.js' ) }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='styles.css' ) }}">
 
         {% block head %} {% endblock head %}
