@@ -50,6 +50,7 @@ class GameSession:
     host_id: int
     test_sentence: str
     players: dict[int, Player] = field(default_factory=dict)
+    started: bool = field(default=False)
 
 
 class CreateRoomForm(FlaskForm):
@@ -79,10 +80,31 @@ def game_ws(ws: Server):
 
     game_room: GameSession | None = games.get(initial_data["game_id"])
 
-    if not game_room or initial_data["player_id"] not in game_room.players:
+    if (
+        not game_room
+        or initial_data["player_id"] not in game_room.players
+        or game_room.started
+    ):
         # Information is invalid
         ws.close()
         return
+
+    # Notify existing players about new player
+    me = game_room.players[my_id]
+    new_player_msg = to_json(
+        {
+            "msg_type": "new_player",
+            "data": {
+                "player_id": my_id,
+                "permanent_id": me.permanent_id,
+                "username": me.username,
+            },
+        }
+    )
+
+    for p in game_room.players.values():
+        if sock := p.ws:
+            sock.send(new_player_msg)
 
     # Copy socket player socket to player roster
     game_room.players[my_id].ws = ws
@@ -95,7 +117,31 @@ def game_ws(ws: Server):
         }
         for player_id, player in game_room.players.items()
     ]
-    ws.send(to_json(player_data))
+    ws.send(to_json({"msg_type": "player_list", "data": player_data}))
+
+    while True:
+        try:
+            msg = ws.receive()
+        except ConnectionError:
+            # Client has disconnected
+            # FIXME: does not detect player disconnection
+
+            del game_room.players[my_id]
+            player_left_msg = to_json(
+                {
+                    "msg_type": "player_left",
+                    "data": my_id,
+                }
+            )
+
+            for p in game_room.players.values():
+                if sock := p.ws:
+                    sock.send(player_left_msg)
+
+            return
+
+        print(msg)
+        # TODO: Gameplay
 
 
 @game_bp.route("/joinrandom")

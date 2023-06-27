@@ -9,8 +9,6 @@ if (document.location.protocol === "http:") {
 
 const ws = new WebSocket(`${proto}//${document.location.host}/game/ws`);
 
-let receivedPlayers = false;
-
 function createPlayerCard(playerData) {
     const newCard = playerCardTemplate.content.cloneNode(true);
 
@@ -34,16 +32,33 @@ ws.onopen = (_ev) => {
 };
 
 ws.onmessage = (ev) => {
-    if (!receivedPlayers) {
-        const parsedMsg = JSON.parse(ev.data);
-        console.log(parsedMsg);
+    const parsedMsg = JSON.parse(ev.data);
 
-        // Creating player cards for each player
-        parsedMsg.forEach((playerData) => {
-            const card = createPlayerCard(playerData);
+    switch (parsedMsg.msg_type) {
+        case "player_list": {
+            // Creating player cards for each player
+            parsedMsg.data.forEach((playerData) => {
+                const card = createPlayerCard(playerData);
+                playerList.appendChild(card);
+            });
+            break;
+        }
+
+        case "new_player": {
+            const card = createPlayerCard(parsedMsg.data);
             playerList.appendChild(card);
-        });
+            break;
+        }
 
-        receivedPlayers = true;
+        case "player_left": {
+            const card = playerList.querySelector(
+                `#player-card-${parsedMsg.data}`,
+            );
+            card.remove();
+            break;
+        }
+
+        default:
+            break;
     }
 };
