@@ -1,7 +1,7 @@
 const playerCardTemplate = document.querySelector("#player-card-template");
 const playerList = document.querySelector("#player-list");
 
-const socket = io({
+const socket = io("/game", {
     auth: {
         player_id: myID,
         game_id: gameID,

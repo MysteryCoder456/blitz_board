@@ -72,7 +72,7 @@ game_bp = Blueprint(
 games: dict[int, GameSession] = {}
 
 
-@socketio.on("connect")
+@socketio.on("connect", namespace="/game")
 def socket_connect(auth: dict):
     player_id = auth["player_id"]
     game_id = auth["game_id"]
@@ -112,7 +112,7 @@ def socket_connect(auth: dict):
     emit("player list", player_list)
 
 
-@socketio.on("disconnect")
+@socketio.on("disconnect", namespace="/game")
 def socket_disconnect():
     player_room = session["game_id"]
     player_id: int | None = None
