@@ -62,6 +62,10 @@ def home():
             username = current_user.username  # type: ignore
 
         if game := games.get(game_id):
+            if len(game.players) >= game.player_limit:
+                flash("This game is full!", "warning")
+                return redirect(url_for("main.home"))
+
             player_id = int(time() * 1000)
             session["my_id"] = player_id
             session["game_id"] = game_id

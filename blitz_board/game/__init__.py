@@ -15,6 +15,7 @@ from flask import (
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from flask_socketio import emit, join_room
+from wtforms import validators
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 from english_words import get_english_words_set
@@ -30,7 +31,7 @@ def generate_random_sentence(word_count: int) -> str:
     @returns: The random sentence generated.
     """
 
-    word_set = get_english_words_set(["gcide"], lower=True)
+    word_set = get_english_words_set(["gcide"], alpha=True, lower=True)
     words = choices(list(word_set), k=word_count)
     return " ".join(words)
 
@@ -48,6 +49,7 @@ class GameSession:
     private: bool
     host_id: int
     test_sentence: str
+    player_limit: int
     players: dict[int, Player] = field(default_factory=dict)
     started: bool = field(default=False)
 
@@ -57,6 +59,11 @@ class CreateRoomForm(FlaskForm):
         label="Word Count",
         validators=[NumberRange(min=5)],
         default=15,
+    )
+    player_limit = IntegerField(
+        label="Player Limit",
+        validators=[NumberRange(min=1, max=5)],
+        default=5,
     )
     private = BooleanField(label="Private Game?")
     submit = SubmitField(label="Create")
@@ -186,6 +193,7 @@ def create_game():
             private=form.private.data,
             host_id=player_id,
             test_sentence=generate_random_sentence(form.word_count.data),
+            player_limit=form.player_limit.data,
         )
         games[game_id] = new_game
 
