@@ -129,8 +129,7 @@ def socket_disconnect():
             player_id = p_id
 
     if player_id:
-        # TODO: uncomment me
-        # del games[player_room].players[player_id]
+        del games[player_room].players[player_id]
         emit("player leave", player_id, to=player_room)
 
 
