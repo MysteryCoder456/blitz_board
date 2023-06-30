@@ -1,5 +1,6 @@
 const playerCardTemplate = document.querySelector("#player-card-template");
 const playerList = document.querySelector("#player-list");
+const typingArea = document.querySelector("#typing-area");
 
 const socket = io("/game", {
     auth: {
@@ -7,6 +8,9 @@ const socket = io("/game", {
         game_id: gameID,
     },
 });
+
+let currentCharIndex = 0;
+const lastCharIndex = testSentence.length;
 
 function createPlayerCard(playerData) {
     const newCard = playerCardTemplate.content.cloneNode(true);
@@ -41,3 +45,28 @@ socket.on("player leave", (playerId) => {
     const card = playerList.querySelector(`#player-card-${playerId}`);
     card.remove();
 });
+
+document.onkeydown = (ev) => {
+    // Check only alphanumeric keys
+    if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+        return;
+    }
+
+    // FIXME: highlight error if user makes a mistake at space character
+
+    if (ev.code === "Backspace") {
+        currentCharIndex--;
+        const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
+        charElem.className = "";
+    } else {
+        const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
+
+        if (charElem.innerText === ev.key) {
+            charElem.className = "text-white";
+        } else {
+            charElem.className = "text-red-500";
+        }
+
+        currentCharIndex++;
+    }
+};

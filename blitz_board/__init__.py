@@ -33,4 +33,4 @@ app.register_blueprint(game_bp)
 
 
 def run():
-    socketio.run(app, use_reloader=True)
+    socketio.run(app, use_reloader=True, debug=True)

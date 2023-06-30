@@ -129,7 +129,8 @@ def socket_disconnect():
             player_id = p_id
 
     if player_id:
-        del games[player_room].players[player_id]
+        # TODO: uncomment me
+        # del games[player_room].players[player_id]
         emit("player leave", player_id, to=player_room)
 
 
@@ -156,6 +157,7 @@ def play_game(game_id: int):
         "play_game.html",
         player_id=player_id,
         game=game_room,
+        enumerate=enumerate,
         socket_io=url_for("static", filename="js/socket.io.js"),
         play_script=url_for("static", filename="js/play.js"),
         default_pfp=url_for("static", filename="images/default-pfp.jpg"),

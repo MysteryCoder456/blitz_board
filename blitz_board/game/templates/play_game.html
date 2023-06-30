@@ -9,6 +9,7 @@
     <script>
         const myID = {{ player_id }};
         const gameID = {{ game.game_id }};
+        const testSentence = "{{ game.test_sentence }}";
     </script>
 {% endblock head %}
 
@@ -25,7 +26,9 @@
     </div>
 
     <div id="typing-area" class="mt-8 text-center text-slate-500">
-        {{ game.test_sentence }}
+        {% for i, char in enumerate(game.test_sentence) %}
+            <span id="char-{{ i }}">{{ char }}</span>
+        {% endfor %}
     </div>
 {% endblock main %}
 
