@@ -10,7 +10,8 @@ const socket = io("/game", {
 });
 
 let currentCharIndex = 0;
-const lastCharIndex = testSentence.length;
+let typedSentence = "";
+let finishHasRun = false;
 
 function createPlayerCard(playerData) {
     const newCard = playerCardTemplate.content.cloneNode(true);
@@ -24,6 +25,18 @@ function createPlayerCard(playerData) {
     // TODO: Set profile picture too
 
     return newCard;
+}
+
+function isIllegalKeyEvent(ev) {
+    return (
+        ev.metaKey ||
+        ev.altKey ||
+        ev.ctrlKey ||
+        ev.shiftKey ||
+        ev.repeat ||
+        ev.key.startsWith("Arrow") ||
+        ev.key.startsWith("Page")
+    );
 }
 
 socket.on("player list", (players) => {
@@ -47,8 +60,18 @@ socket.on("player leave", (playerId) => {
 });
 
 document.onkeydown = (ev) => {
+    // Check if test is complete
+    if (currentCharIndex >= testSentence.length) {
+        if (!finishHasRun) {
+            emit("test complete", typedSentence);
+        }
+
+        finishHasRun = true;
+        return;
+    }
+
     // Check only alphanumeric keys
-    if (ev.metaKey || ev.altKey || ev.ctrlKey || ev.shiftKey) {
+    if (isIllegalKeyEvent(ev)) {
         return;
     }
 
@@ -56,6 +79,8 @@ document.onkeydown = (ev) => {
 
     if (ev.code === "Backspace") {
         currentCharIndex--;
+        typedSentence = typedSentence.slice(0, currentCharIndex);
+
         const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
         charElem.className = "";
     } else {
@@ -68,5 +93,6 @@ document.onkeydown = (ev) => {
         }
 
         currentCharIndex++;
+        typedSentence += ev.key;
     }
 };

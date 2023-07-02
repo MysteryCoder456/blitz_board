@@ -133,6 +133,12 @@ def socket_disconnect():
         emit("player leave", player_id, to=player_room)
 
 
+@socketio.on("test complete", namespace="/game")
+def test_complete(typed_sentence: str):
+    # TODO: Test completion stuff
+    ...
+
+
 @game_bp.route("/joinrandom")
 def join_random():
     # TODO: Do this
