@@ -9,6 +9,9 @@ const socket = io("/game", {
     },
 });
 
+let gameStarted = false;
+let testSentenceLength = 0;
+
 let currentCharIndex = 0;
 let typedSentence = "";
 let finishHasRun = false;
@@ -59,11 +62,28 @@ socket.on("player leave", (playerId) => {
     card.remove();
 });
 
+socket.on("test start", (testSentence) => {
+    // Create the typing area elements
+    for (let i = 0; i < testSentence.length; i++) {
+        const newSpan = document.createElement("span");
+        newSpan.id = `char-${i}`;
+        newSpan.innerText = testSentence[i];
+        typingArea.appendChild(newSpan);
+    }
+
+    gameStarted = true;
+    testSentenceLength = testSentence.length;
+});
+
 document.onkeydown = (ev) => {
+    if (!gameStarted) {
+        return;
+    }
+
     // Check if test is complete
-    if (currentCharIndex >= testSentence.length) {
+    if (currentCharIndex >= testSentenceLength) {
         if (!finishHasRun) {
-            emit("test complete", typedSentence);
+            socket.emit("test complete", typedSentence);
         }
 
         finishHasRun = true;

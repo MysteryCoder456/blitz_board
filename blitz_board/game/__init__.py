@@ -127,10 +127,29 @@ def socket_disconnect():
     for p_id, p in games[player_room].players.items():
         if p.session_id == request.sid:  # type: ignore
             player_id = p_id
+            break
+    else:
+        return
 
-    if player_id:
-        del games[player_room].players[player_id]
-        emit("player leave", player_id, to=player_room)
+    del games[player_room].players[player_id]
+    emit("player leave", player_id, to=player_room)
+
+
+@socketio.on("test start", namespace="/game")
+def test_start():
+    player_room = session["game_id"]
+    game_room = games[player_room]
+    player_id: int | None = None
+
+    for p_id, p in games[player_room].players.items():
+        if p.session_id == request.sid:  # type: ignore
+            player_id = p_id
+            break
+    else:
+        return
+
+    if game_room.host_id == player_id:
+        emit("test start", game_room.test_sentence, to=game_room.game_id)
 
 
 @socketio.on("test complete", namespace="/game")
