@@ -139,6 +139,10 @@ def socket_disconnect():
 def test_start():
     player_room = session["game_id"]
     game_room = games[player_room]
+
+    if game_room.started:
+        return
+
     player_id: int | None = None
 
     for p_id, p in games[player_room].players.items():
@@ -149,6 +153,7 @@ def test_start():
         return
 
     if game_room.host_id == player_id:
+        game_room.started = True
         emit("test start", game_room.test_sentence, to=game_room.game_id)
 
 

@@ -1,6 +1,8 @@
 const playerCardTemplate = document.querySelector("#player-card-template");
+const statusHeader = document.querySelector("#status-header");
 const playerList = document.querySelector("#player-list");
 const typingArea = document.querySelector("#typing-area");
+const startBtn = document.querySelector("#start-btn");
 
 const socket = io("/game", {
     auth: {
@@ -15,6 +17,10 @@ let testSentenceLength = 0;
 let currentCharIndex = 0;
 let typedSentence = "";
 let finishHasRun = false;
+
+if (myID === hostID) {
+    startBtn.onclick = () => socket.emit("test start");
+}
 
 function createPlayerCard(playerData) {
     const newCard = playerCardTemplate.content.cloneNode(true);
@@ -63,6 +69,12 @@ socket.on("player leave", (playerId) => {
 });
 
 socket.on("test start", (testSentence) => {
+    statusHeader.innerText = "Game Started!";
+
+    if (myID === hostID) {
+        startBtn.remove();
+    }
+
     // Create the typing area elements
     for (let i = 0; i < testSentence.length; i++) {
         const newSpan = document.createElement("span");
