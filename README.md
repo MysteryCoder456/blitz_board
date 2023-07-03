@@ -1,3 +1,3 @@
-# Social Snake 🐍
+# Blitz Board ⌨️
 
-Website for puzzle solvers to unite and compete for the title of Supreme Snake!
+Website for competitive real-time typists!
