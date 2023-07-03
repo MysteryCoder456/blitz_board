@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% from "macros.html" import render_field %}
+
+{% block title %}Home{% endblock title %}
+
+{% block main %}
+    <h1 align="center" class="text-2xl">Let's Blitz Your Board!</h1>
+
+    <form method="post" class="text-center" id="join-form">
+        {{ form.csrf_token }}
+
+        {% if not current_user.is_authenticated %}
+            {{ render_field(form.username) }}
+        {% endif %}
+
+        {{ render_field(form.game_id) }}
+        <input name="submit" type="hidden" />
+
+        <div class="flex flex-col text-center items-center gap-5 text-[var(--gunmetal)] mt-6">
+            <button id="submit-btn" class="btn bg-[rgb(var(--spring-green))]">
+                Join Game
+            </button>
+            <a href="{{ url_for('game.join_random') }}" class="btn bg-[rgb(var(--selective-yellow))]">
+                Join Random
+            </a>
+            <a href="{{ url_for('game.create_game') }}" class="btn bg-[rgb(var(--selective-yellow))]">
+                Create Game
+            </a>
+        </div>
+    </form>
+{% endblock main %}
+
+{% block bodyend %}
+    <script>
+        let form = document.querySelector("#join-form");
+        let submitBtn = document.querySelector("#submit-btn");
+
+        submitBtn.onclick = () => form.submit();
+    </script>
+{% endblock bodyend %}

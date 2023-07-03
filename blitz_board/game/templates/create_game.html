@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% from "macros.html" import render_field %}
+
+{% block title %}New Game{% endblock title %}
+
+{% block main %}
+    <div class="text-center">
+        <h1 class="text-2xl">Create New Game</h1>
+        <p>Invite your friends too!</p>
+    </div>
+
+    <br>
+
+    <form method="post" class="text-center">
+        {{ form.csrf_token }}
+        {{ render_field(form.word_count) }}
+        {{ render_field(form.player_limit) }}
+        {{ render_field(form.private) }}
+        <br>
+        {{ form.submit }}
+    </form>
+{% endblock main %}

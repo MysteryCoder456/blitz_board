@@ -7,7 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 from dotenv import load_dotenv
 
-from social_snake import db
+from blitz_board import db
 
 load_dotenv()
 

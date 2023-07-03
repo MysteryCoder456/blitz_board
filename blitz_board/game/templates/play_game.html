@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Playing Game
+{% endblock title %}
+
+{% block head %}
+    <script src="{{ socket_io }}"></script>
+    <script>
+        const myID = {{ player_id }};
+        const gameID = {{ game.game_id }};
+        const hostID = {{ game.host_id }};
+    </script>
+{% endblock head %}
+
+{% block main %}
+    <template id="player-card-template">
+        <div class="player-card grid grid-cols-10 items-center gap-2" id="player-card-0">
+            <img src="{{ default_pfp }}" alt="Profile Picture" width=45 height=45 class="rounded-full" />
+            <p class="player-name col-span-3 truncate">Username</p>
+            <progress class="player-progress col-span-6 h-2 rounded" max=1 value=0 />
+        </div>
+    </template>
+
+    <h1 align="center" class="text-lg mb-2" id="status-header">Waiting For Players</h1>
+
+    <div id="player-list" class="mx-8 flex flex-col gap-3">
+    </div>
+
+    {% if player_id == game.host_id %}
+        <div align="center">
+            <button id="start-btn" class="mt-2 text-[var(--gunmetal)] btn bg-[rgb(var(--spring-green))]">
+                Start Game
+            </button>
+        </div>
+    {% endif %}
+
+    <div id="typing-area" class="mt-8 text-center text-slate-500">
+    </div>
+{% endblock main %}
+
+{% block bodyend %}
+    <script src="{{ play_script }}"></script>
+{% endblock bodyend %}

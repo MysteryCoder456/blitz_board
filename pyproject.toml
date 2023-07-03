@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "social-snake"
+name = "blitz_board"
 version = "0.1.0"
-description = "Puzzle Haven"
+description = "Keyboard Warrior Haven"
 authors = ["Rehatbir Singh <rehatbir.singh@gmail.com>"]
 readme = "README.md"
-packages = [{include = "social_snake"}]
+packages = [{include = "blitz_board"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -16,6 +16,9 @@ flask = "^2.3.2"
 flask-sqlalchemy = "^3.0.3"
 flask-wtf = "^1.1.1"
 yagmail = "^0.15.293"
+english-words = "^2.0.1"
+flask-socketio = "^5.3.4"
+simple-websocket = "^0.10.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
@@ -23,7 +26,7 @@ ruff = "^0.0.262"
 alembic = "^1.10.4"
 
 [tool.poetry.scripts]
-start = "social_snake:run"
+start = "blitz_board:run"
 
 [tool.ruff]
 ignore = ["E402"]
