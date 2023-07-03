@@ -87,6 +87,13 @@ socket.on("test start", (testSentence) => {
     testSentenceLength = testSentence.length;
 });
 
+socket.on("test progress", ({ player_id, progress }) => {
+    const cardProgress = playerList.querySelector(
+        `#player-card-${player_id} progress`,
+    );
+    cardProgress.value = progress;
+});
+
 document.onkeydown = (ev) => {
     if (!gameStarted) {
         return;
@@ -127,4 +134,8 @@ document.onkeydown = (ev) => {
         currentCharIndex++;
         typedSentence += ev.key;
     }
+
+    // Send current progress to server
+    const progress = currentCharIndex / testSentenceLength;
+    socket.emit("test progress", progress);
 };

@@ -157,6 +157,30 @@ def test_start():
         emit("test start", game_room.test_sentence, to=game_room.game_id)
 
 
+@socketio.on("test progress", namespace="/game")
+def test_progress(progress: float):
+    player_room = session["game_id"]
+    game_room = games[player_room]
+
+    if not game_room.started:
+        return
+
+    player_id: int | None = None
+
+    for p_id, p in games[player_room].players.items():
+        if p.session_id == request.sid:  # type: ignore
+            player_id = p_id
+            break
+    else:
+        return
+
+    emit(
+        "test progress",
+        {"player_id": player_id, "progress": progress},
+        to=game_room.game_id,
+    )
+
+
 @socketio.on("test complete", namespace="/game")
 def test_complete(typed_sentence: str):
     # TODO: Test completion stuff
