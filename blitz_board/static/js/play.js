@@ -1,8 +1,9 @@
 const playerCardTemplate = document.querySelector("#player-card-template");
 const statusHeader = document.querySelector("#status-header");
 const playerList = document.querySelector("#player-list");
-const typingArea = document.querySelector("#typing-area");
 const startBtn = document.querySelector("#start-btn");
+const typingArea = document.querySelector("#typing-area");
+const cursor = document.querySelector("#cursor");
 
 const socket = io("/game", {
     auth: {
@@ -44,8 +45,19 @@ function isIllegalKeyEvent(ev) {
         ev.shiftKey ||
         ev.repeat ||
         ev.key.startsWith("Arrow") ||
-        ev.key.startsWith("Page")
+        ev.key.startsWith("Page") ||
+        ev.key === "Escape"
     );
+}
+
+function updateCursorPosition() {
+    const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
+    const charBB = charElem.getBoundingClientRect();
+
+    cursor.style.left = `${charElem.offsetLeft}px`;
+    cursor.style.top = `${charBB.offsetTop}px`;
+    cursor.style.width = `${charBB.width}px`;
+    cursor.style.height = `${charBB.height}px`;
 }
 
 socket.on("player list", (players) => {
@@ -85,6 +97,14 @@ socket.on("test start", (testSentence) => {
 
     gameStarted = true;
     testSentenceLength = testSentence.length;
+
+    // Display cursor
+    cursor.style.display = "block";
+    updateCursorPosition();
+
+    // Set color of first character under cursor
+    const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
+    charElem.style.color = "rgb(var(--selective-yellow))";
 });
 
 socket.on("test progress", ({ player_id, progress }) => {
@@ -117,23 +137,35 @@ document.onkeydown = (ev) => {
     // FIXME: highlight error if user makes a mistake at space character
 
     if (ev.code === "Backspace") {
+        const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
+        charElem.style.color = "#64748B";
+
         currentCharIndex--;
         typedSentence = typedSentence.slice(0, currentCharIndex);
 
-        const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
-        charElem.className = "";
+        const newCharElem = typingArea.querySelector(
+            `#char-${currentCharIndex}`,
+        );
+        newCharElem.style.color = "rgb(var(--selective-yellow))";
     } else {
         const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
 
         if (charElem.innerText === ev.key) {
-            charElem.className = "text-white";
+            charElem.style.color = "var(--ghost-white)";
         } else {
-            charElem.className = "text-red-500";
+            charElem.style.color = "rgb(var(--red-munsell))";
         }
 
         currentCharIndex++;
         typedSentence += ev.key;
+
+        const newCharElem = typingArea.querySelector(
+            `#char-${currentCharIndex}`,
+        );
+        newCharElem.style.color = "rgb(var(--selective-yellow))";
     }
+
+    updateCursorPosition();
 
     // Send current progress to server
     const progress = currentCharIndex / testSentenceLength;

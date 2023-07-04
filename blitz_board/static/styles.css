@@ -163,3 +163,11 @@ canvas {
     float: left;
     white-space: pre;
 }
+
+#cursor {
+    display: none;
+    background: rgb(var(--neon-blue));
+    position: absolute;
+    z-index: -5;
+    transition: top 0.05s, left 0.05s;
+}
