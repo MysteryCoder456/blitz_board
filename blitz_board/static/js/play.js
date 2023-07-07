@@ -32,6 +32,13 @@ function createPlayerCard(playerData) {
     const username = div.querySelector(".player-name");
     username.innerText = playerData.username;
 
+    if (playerData.player_id === myID) {
+        const youSpan = document.createElement("SPAN");
+        youSpan.innerText = " (You)";
+        youSpan.className = "text-slate-500";
+        username.appendChild(youSpan);
+    }
+
     // TODO: Set profile picture too
 
     return newCard;
@@ -50,6 +57,7 @@ function isIllegalKeyEvent(ev) {
     );
 }
 
+// FIXME: Break when going to new line
 function updateCursorPosition() {
     const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
     const charBB = charElem.getBoundingClientRect();
@@ -114,19 +122,39 @@ socket.on("test progress", ({ player_id, progress }) => {
     cardProgress.value = progress;
 });
 
+socket.on("test complete", ({ player_id, speed, accuracy }) => {
+    const finishedSpan = document.createElement("SPAN");
+    finishedSpan.innerHTML = "<b>FINISHED!</b>";
+    finishedSpan.style.color = "rgb(var(--spring-green))";
+
+    const infoSpan = document.createElement("SPAN");
+    infoSpan.innerText = ` (${speed} WPM, ${accuracy}% Accuracy)`;
+    infoSpan.className = "text-slate-500";
+
+    const cardProgress = playerList.querySelector(
+        `#player-card-${player_id} progress`,
+    );
+    cardProgress.parentNode.appendChild(finishedSpan);
+    cardProgress.parentNode.appendChild(infoSpan);
+    cardProgress.remove(cardProgress);
+});
+
+window.onresize = updateCursorPosition;
+
 document.onkeydown = (ev) => {
     if (!gameStarted) {
         return;
     }
 
     // Check if test is complete
-    if (currentCharIndex >= testSentenceLength) {
+    if (currentCharIndex >= testSentenceLength - 1) {
         if (!finishHasRun) {
+            cursor.style.display = "none";
+            statusHeader.innerText = "Game Finished!";
             socket.emit("test complete", typedSentence);
         }
 
         finishHasRun = true;
-        return;
     }
 
     // Check only alphanumeric keys

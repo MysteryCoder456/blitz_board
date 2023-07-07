@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from dataclasses import dataclass, field
 from random import randint, choices
@@ -52,6 +53,12 @@ class GameSession:
     player_limit: int
     players: dict[int, Player] = field(default_factory=dict)
     started: bool = field(default=False)
+    started_at: datetime | None = field(default=None)
+
+    def start(self):
+        if not self.started:
+            self.started = True
+            self.started_at = datetime.now()
 
 
 class CreateRoomForm(FlaskForm):
@@ -153,7 +160,7 @@ def test_start():
         return
 
     if game_room.host_id == player_id:
-        game_room.started = True
+        game_room.start()
         emit("test start", game_room.test_sentence, to=game_room.game_id)
 
 
@@ -183,8 +190,50 @@ def test_progress(progress: float):
 
 @socketio.on("test complete", namespace="/game")
 def test_complete(typed_sentence: str):
-    # TODO: Test completion stuff
-    ...
+    now = datetime.now()
+    player_room = session["game_id"]
+    game_room = games[player_room]
+
+    if not game_room.started:
+        return
+
+    player_id: int | None = None
+    player: Player | None = None
+
+    for p_id, p in games[player_room].players.items():
+        if p.session_id == request.sid:  # type: ignore
+            player_id = p_id
+            player = p
+            break
+    else:
+        return
+
+    time_taken = now - game_room.started_at  # type: ignore
+    word_count = game_room.test_sentence.count(" ") + 1
+    typing_speed = word_count / time_taken.total_seconds() * 60  # wpm
+    accuracy = min(
+        100 * len(typed_sentence) / len(game_room.test_sentence),
+        100,
+    )
+
+    if typed_sentence != game_room.test_sentence:
+        for typed_char, test_char in zip(
+            typed_sentence, game_room.test_sentence
+        ):
+            if typed_char != test_char:
+                accuracy -= 1 / len(game_room.test_sentence)
+
+    emit(
+        "test complete",
+        {
+            "player_id": player_id,
+            "speed": int(typing_speed),
+            "accuracy": int(accuracy),
+        },
+        to=game_room.game_id,
+    )
+
+    # TODO: Update user stats
 
 
 @game_bp.route("/joinrandom")

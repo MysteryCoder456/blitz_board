@@ -155,6 +155,18 @@ canvas {
     cursor: not-allowed;
 }
 
+.player-progress {
+    background: rgba(var(--selective-yellow), 0.2);
+}
+
+.player-progress::-moz-progress-bar {
+    background: rgb(var(--neon-blue));
+}
+
+.player-progress::-webkit-progress-value {
+    background: rgb(var(--neon-blue));
+}
+
 #typing-area {
     user-select: none;
 }
@@ -169,5 +181,5 @@ canvas {
     background: rgb(var(--neon-blue));
     position: absolute;
     z-index: -5;
-    transition: top 0.05s, left 0.05s;
+    transition: top 0.03s, left 0.03s;
 }
