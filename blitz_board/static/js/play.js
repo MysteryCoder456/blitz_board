@@ -57,7 +57,6 @@ function isIllegalKeyEvent(ev) {
     );
 }
 
-// FIXME: Break when going to new line
 function updateCursorPosition() {
     const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
     const charBB = charElem.getBoundingClientRect();
