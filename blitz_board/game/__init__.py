@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from dataclasses import dataclass, field
 from random import randint, choices
@@ -16,12 +16,13 @@ from flask import (
 from flask_login import current_user, login_required
 from flask_wtf import FlaskForm
 from flask_socketio import emit, join_room
-from wtforms import validators
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 from english_words import get_english_words_set
 
 from blitz_board import socketio
+
+START_COUNTDOWN: int = 5
 
 
 def generate_random_sentence(word_count: int) -> str:
@@ -55,10 +56,12 @@ class GameSession:
     started: bool = field(default=False)
     started_at: datetime | None = field(default=None)
 
-    def start(self):
+    def start(self, *, seconds_from_now: int = 0):
         if not self.started:
             self.started = True
-            self.started_at = datetime.now()
+            self.started_at = datetime.now() + timedelta(
+                seconds=seconds_from_now
+            )
 
 
 class CreateRoomForm(FlaskForm):
@@ -160,8 +163,15 @@ def test_start():
         return
 
     if game_room.host_id == player_id:
-        game_room.start()
-        emit("test start", game_room.test_sentence, to=game_room.game_id)
+        game_room.start(seconds_from_now=START_COUNTDOWN)
+        emit(
+            "test start",
+            {
+                "test_sentence": game_room.test_sentence,
+                "starting_in": START_COUNTDOWN,
+            },
+            to=game_room.game_id,
+        )
 
 
 @socketio.on("test progress", namespace="/game")

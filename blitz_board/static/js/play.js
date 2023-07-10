@@ -19,6 +19,10 @@ let currentCharIndex = 0;
 let typedSentence = "";
 let finishHasRun = false;
 
+let countdown = 0;
+let countdownId = null;
+let testSentence = null;
+
 if (myID === hostID) {
     startBtn.onclick = () => socket.emit("test start");
 }
@@ -67,29 +71,19 @@ function updateCursorPosition() {
     cursor.style.height = `${charBB.height}px`;
 }
 
-socket.on("player list", (players) => {
-    // Creating player cards for each player
-    players.forEach((playerData) => {
-        const card = createPlayerCard(playerData);
-        playerList.appendChild(card);
-    });
-});
+function updateCountdown() {
+    if (countdown > 0) {
+        // TODO: clock ticking sfx
+        statusHeader.innerHTML = `Game Starting in <b>${countdown}</b>`;
+        countdown--;
+    } else {
+        startGame();
+        clearInterval(countdownId);
+        statusHeader.innerText = "Game Started!";
+    }
+}
 
-socket.on("player join", (player) => {
-    // Create player card for new player
-    const card = createPlayerCard(player);
-    playerList.appendChild(card);
-});
-
-socket.on("player leave", (playerId) => {
-    // Remove corresponding player card
-    const card = playerList.querySelector(`#player-card-${playerId}`);
-    card.remove();
-});
-
-socket.on("test start", (testSentence) => {
-    statusHeader.innerText = "Game Started!";
-
+function startGame() {
     if (myID === hostID) {
         startBtn.remove();
     }
@@ -112,6 +106,34 @@ socket.on("test start", (testSentence) => {
     // Set color of first character under cursor
     const charElem = typingArea.querySelector(`#char-${currentCharIndex}`);
     charElem.style.color = "rgb(var(--selective-yellow))";
+}
+
+socket.on("player list", (players) => {
+    // Creating player cards for each player
+    players.forEach((playerData) => {
+        const card = createPlayerCard(playerData);
+        playerList.appendChild(card);
+    });
+});
+
+socket.on("player join", (player) => {
+    // Create player card for new player
+    const card = createPlayerCard(player);
+    playerList.appendChild(card);
+});
+
+socket.on("player leave", (playerId) => {
+    // Remove corresponding player card
+    const card = playerList.querySelector(`#player-card-${playerId}`);
+    card.remove();
+});
+
+socket.on("test start", ({ test_sentence, starting_in }) => {
+    countdown = starting_in;
+    testSentence = test_sentence;
+
+    updateCountdown();
+    countdownId = setInterval(updateCountdown, 1000);
 });
 
 socket.on("test progress", ({ player_id, progress }) => {
