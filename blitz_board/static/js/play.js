@@ -63,7 +63,7 @@ function updateCursorPosition() {
     const charBB = charElem.getBoundingClientRect();
 
     cursor.style.left = `${charElem.offsetLeft}px`;
-    cursor.style.top = `${charBB.offsetTop}px`;
+    cursor.style.top = `${charElem.offsetTop}px`;
     cursor.style.width = `${charBB.width}px`;
     cursor.style.height = `${charBB.height}px`;
 }
