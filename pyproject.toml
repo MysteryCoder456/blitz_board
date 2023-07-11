@@ -16,7 +16,6 @@ flask = "^2.3.2"
 flask-sqlalchemy = "^3.0.3"
 flask-wtf = "^1.1.1"
 yagmail = "^0.15.293"
-english-words = "^2.0.1"
 flask-socketio = "^5.3.4"
 simple-websocket = "^0.10.1"
 

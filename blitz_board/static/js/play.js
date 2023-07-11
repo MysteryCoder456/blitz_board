@@ -84,10 +84,6 @@ function updateCountdown() {
 }
 
 function startGame() {
-    if (myID === hostID) {
-        startBtn.remove();
-    }
-
     // Create the typing area elements
     for (let i = 0; i < testSentence.length; i++) {
         const newSpan = document.createElement("span");
@@ -129,6 +125,10 @@ socket.on("player leave", (playerId) => {
 });
 
 socket.on("test start", ({ test_sentence, starting_in }) => {
+    if (myID === hostID) {
+        startBtn.remove();
+    }
+
     countdown = starting_in;
     testSentence = test_sentence;
 
@@ -167,17 +167,6 @@ document.onkeydown = (ev) => {
         return;
     }
 
-    // Check if test is complete
-    if (currentCharIndex >= testSentenceLength - 1) {
-        if (!finishHasRun) {
-            cursor.style.display = "none";
-            statusHeader.innerText = "Game Finished!";
-            socket.emit("test complete", typedSentence);
-        }
-
-        finishHasRun = true;
-    }
-
     // Check only alphanumeric keys
     if (isIllegalKeyEvent(ev)) {
         return;
@@ -205,18 +194,33 @@ document.onkeydown = (ev) => {
             charElem.style.color = "rgb(var(--red-munsell))";
         }
 
-        currentCharIndex++;
         typedSentence += ev.key;
+        currentCharIndex++;
 
-        const newCharElem = typingArea.querySelector(
-            `#char-${currentCharIndex}`,
-        );
-        newCharElem.style.color = "rgb(var(--selective-yellow))";
+        if (currentCharIndex < testSentenceLength) {
+            const newCharElem = typingArea.querySelector(
+                `#char-${currentCharIndex}`,
+            );
+            newCharElem.style.color = "rgb(var(--selective-yellow))";
+        }
     }
 
-    updateCursorPosition();
+    // Check if test is complete
+    if (currentCharIndex >= testSentenceLength) {
+        if (!finishHasRun) {
+            cursor.style.display = "none";
+            statusHeader.innerText = "Game Finished!";
+            socket.emit("test complete", typedSentence);
 
-    // Send current progress to server
-    const progress = currentCharIndex / testSentenceLength;
-    socket.emit("test progress", progress);
+            console.log("TEST COMPLETED!");
+        }
+
+        finishHasRun = true;
+    } else {
+        updateCursorPosition();
+
+        // Send current progress to server
+        const progress = currentCharIndex / testSentenceLength;
+        socket.emit("test progress", progress);
+    }
 };

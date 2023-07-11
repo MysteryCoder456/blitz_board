@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime, timedelta
 from pathlib import Path
 from dataclasses import dataclass, field
@@ -18,11 +19,15 @@ from flask_wtf import FlaskForm
 from flask_socketio import emit, join_room
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
-from english_words import get_english_words_set
 
 from blitz_board import socketio
 
 START_COUNTDOWN: int = 5
+WORDS_PATH = Path(__file__).parents[1] / "NGSL_1.2_stats.csv"
+
+with open(WORDS_PATH, "r") as f:
+    reader = csv.reader(f)
+    WORDS: list[str] = [rec[0] for rec in reader]
 
 
 def generate_random_sentence(word_count: int) -> str:
@@ -33,8 +38,7 @@ def generate_random_sentence(word_count: int) -> str:
     @returns: The random sentence generated.
     """
 
-    word_set = get_english_words_set(["gcide"], alpha=True, lower=True)
-    words = choices(list(word_set), k=word_count)
+    words = choices(WORDS, k=word_count)
     return " ".join(words)
 
 
