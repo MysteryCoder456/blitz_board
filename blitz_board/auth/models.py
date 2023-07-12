@@ -11,6 +11,8 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String, unique=True, nullable=False)
     email = db.Column(db.String, unique=True, nullable=False)
 
+    sessions = db.relationship("SessionStats", back_populates="user")
+
     def __str__(self):
         return self.username
 

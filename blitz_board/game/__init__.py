@@ -21,6 +21,7 @@ from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 
 from blitz_board import socketio
+from .models import SessionStats
 
 START_COUNTDOWN: int = 5
 WORDS_PATH = Path(__file__).parents[1] / "NGSL_1.2_stats.csv"
