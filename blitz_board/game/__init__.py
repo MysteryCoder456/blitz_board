@@ -20,7 +20,7 @@ from flask_socketio import emit, join_room
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 
-from blitz_board import socketio
+from blitz_board import socketio, db
 from .models import SessionStats
 
 START_COUNTDOWN: int = 5
@@ -28,7 +28,7 @@ WORDS_PATH = Path(__file__).parents[1] / "NGSL_1.2_stats.csv"
 
 with open(WORDS_PATH, "r") as f:
     reader = csv.reader(f)
-    WORDS: list[str] = [rec[0] for rec in reader]
+    WORDS: list[str] = [rec[0].lower() for rec in reader]
 
 
 def generate_random_sentence(word_count: int) -> str:
@@ -225,11 +225,7 @@ def test_complete(typed_sentence: str):
 
     time_taken = now - game_room.started_at  # type: ignore
     word_count = game_room.test_sentence.count(" ") + 1
-    typing_speed = word_count / time_taken.total_seconds() * 60  # wpm
-    accuracy = min(
-        100 * len(typed_sentence) / len(game_room.test_sentence),
-        100,
-    )
+    accuracy = min(len(typed_sentence) / len(game_room.test_sentence), 1)
 
     if typed_sentence != game_room.test_sentence:
         for typed_char, test_char in zip(
@@ -238,17 +234,31 @@ def test_complete(typed_sentence: str):
             if typed_char != test_char:
                 accuracy -= 1 / len(game_room.test_sentence)
 
+    typing_speed = (
+        accuracy * word_count / time_taken.total_seconds() * 60
+    )  # in WPM
+
     emit(
         "test complete",
         {
             "player_id": player_id,
             "speed": int(typing_speed),
-            "accuracy": int(accuracy),
+            "accuracy": int(accuracy * 100),
         },
         to=game_room.game_id,
     )
 
-    # TODO: Update user stats
+    # Checking if player is guest player or not
+    if user_id := player.permanent_id:
+        stats = SessionStats(
+            game_id=game_room.game_id,
+            user_id=user_id,
+            speed=typing_speed,
+            accuracy=accuracy,
+            word_count=word_count,
+        )
+        db.session.add(stats)
+        db.session.commit()
 
 
 @game_bp.route("/joinrandom")

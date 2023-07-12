@@ -21,7 +21,6 @@ let finishHasRun = false;
 
 let countdown = 0;
 let countdownId = null;
-let testSentence = null;
 
 if (myID === hostID) {
     startBtn.onclick = () => socket.emit("test start");
@@ -84,16 +83,7 @@ function updateCountdown() {
 }
 
 function startGame() {
-    // Create the typing area elements
-    for (let i = 0; i < testSentence.length; i++) {
-        const newSpan = document.createElement("span");
-        newSpan.id = `char-${i}`;
-        newSpan.innerText = testSentence[i];
-        typingArea.appendChild(newSpan);
-    }
-
     gameStarted = true;
-    testSentenceLength = testSentence.length;
 
     // Display cursor
     cursor.style.display = "block";
@@ -130,10 +120,18 @@ socket.on("test start", ({ test_sentence, starting_in }) => {
     }
 
     countdown = starting_in;
-    testSentence = test_sentence;
+    testSentenceLength = test_sentence.length;
 
     updateCountdown();
     countdownId = setInterval(updateCountdown, 1000);
+
+    // Create the typing area elements
+    for (let i = 0; i < test_sentence.length; i++) {
+        const newSpan = document.createElement("span");
+        newSpan.id = `char-${i}`;
+        newSpan.innerText = test_sentence[i];
+        typingArea.appendChild(newSpan);
+    }
 });
 
 socket.on("test progress", ({ player_id, progress }) => {
