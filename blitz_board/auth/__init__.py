@@ -203,5 +203,26 @@ def logout():
 
 @auth_bp.route("/profile/<int:user_id>")
 def user_profile(user_id: int):
-    # TODO: Do this
-    return "Coming soon"
+    user: User = db.get_or_404(
+        User,
+        user_id,
+        description="The requested user does not exist!",
+    )
+
+    recent_sessions = user.sessions[:10]
+    total_game_count = len(user.sessions)
+
+    avg_speed = int(sum([s.speed for s in user.sessions]) / total_game_count)
+    avg_speed_recent = int(
+        sum([s.speed for s in recent_sessions]) / len(recent_sessions)
+    )
+
+    return render_template(
+        "user_profile.html",
+        default_pfp=url_for("static", filename="images/default-pfp.jpg"),
+        user=user,
+        total_game_count=total_game_count,
+        avg_speed=avg_speed,
+        avg_speed_recent=avg_speed_recent,
+        recent_sessions=recent_sessions,
+    )
