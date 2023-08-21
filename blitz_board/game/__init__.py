@@ -321,7 +321,9 @@ def create_game():
             game_id=game_id,
             private=form.private.data,
             host_id=player_id,
-            test_sentence=generate_random_sentence(form.word_count.data),
+            test_sentence=generate_random_sentence(
+                form.word_count.data,  # type: ignore
+            ),
             player_limit=form.player_limit.data,
         )
         games[game_id] = new_game
