@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta, datetime
 from uuid import uuid4, UUID
 from pathlib import Path
@@ -5,13 +6,14 @@ from pathlib import Path
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import ValidationError
+from flask_wtf.file import FileField, FileAllowed
 from wtforms.fields import (
     EmailField,
     StringField,
     SubmitField,
 )
 from wtforms.validators import Email, Length
-from flask_login import login_required, login_user, logout_user
+from flask_login import current_user, login_required, login_user, logout_user
 
 from .. import db, app, smtp
 from .models import User, UnverifiedUser, MagicLink
@@ -41,6 +43,21 @@ class SignUpForm(FlaskForm):
 
         if db.session.scalar(query):
             raise ValidationError("This username is already taken!")
+
+
+class ChangeAvatarForm(FlaskForm):
+    new_avatar = FileField(
+        label="New Avatar",
+        validators=[
+            FileAllowed(
+                ["png", "jpg", "jpeg"],
+                "Please submit a valid PNG/JPEG file!",
+            )
+        ],
+    )
+    submit = SubmitField()
+
+    # TODO: Validation not working here
 
 
 templates = Path(__file__).parent / "templates"
@@ -226,3 +243,43 @@ def user_profile(user_id: int):
         avg_speed_recent=avg_speed_recent,
         recent_sessions=recent_sessions,
     )
+
+
+@auth_bp.route("/profile/avatar", methods=["GET", "POST"])
+@login_required
+def change_avatar():
+    form = ChangeAvatarForm(request.form)
+
+    if form.validate_on_submit():
+        file = request.files[form.new_avatar.name]
+
+        img_name = file.filename
+        img_ext = img_name.split(".")[-1]  # type: ignore
+        img_filepath: Path = (
+            app.config["UPLOAD_FOLDER"]
+            / "avatars"
+            / f"{uuid4().hex}.{img_ext}"
+        )
+
+        # Saving the file
+        file.save(img_filepath)  # type: ignore
+
+        # Delete old avatar if it exists
+        if old_avatar := current_user.avatar:  # type: ignore
+            os.remove(app.config["UPLOAD_FOLDER"] / old_avatar)
+
+        # Save new avatar filepath to database
+        current_user.avatar = "/".join(img_filepath.parts[-2:])
+        db.session.commit()
+
+        return redirect(
+            url_for(
+                "auth.user_profile",
+                user_id=current_user.id,  # type: ignore
+            )
+        )
+
+    return render_template("change_avatar.html", form=form)
+
+
+# TODO: show avatar in appropriate locations

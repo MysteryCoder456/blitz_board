@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import Flask
@@ -12,6 +13,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+app.config["UPLOAD_FOLDER"] = Path(__file__).parent / "media"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DB_URI")
 
 csrf = CSRFProtect(app)

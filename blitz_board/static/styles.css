@@ -42,10 +42,13 @@ form {
 }
 
 input {
-    background: var(--night);
     border-radius: 8px;
-    box-shadow: 0 3px 6px #0000006b;
     transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+input:not([type="file"]) {
+    background: var(--night);
+    box-shadow: 0 3px 6px #0000006b;
 }
 
 input:hover {
