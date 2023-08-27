@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
@@ -32,6 +32,11 @@ from .game import game_bp
 app.register_blueprint(main_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(game_bp)
+
+
+@app.route("/media/<path:media_path>")
+def site_media(media_path: str):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], media_path)
 
 
 def run():

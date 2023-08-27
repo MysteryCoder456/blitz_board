@@ -6,7 +6,7 @@
 {% block main %}
     <div class="flex md:flex-row sm:flex-col justify-evenly items-center">
         <div class="xl:w-[12vw] lg:w-[16vw] sm:w-[18vw] text-center">
-            <img src="{{ default_pfp }}" alt="Profile Picture" width="100%" height="100%" class="rounded-full" />
+            <img src="{{ user_pfp }}" alt="Profile Picture" width="100%" height="100%" class="rounded-full" />
             <div class="flex flex-row mt-2 justify-center items-center gap-3">
                 <span class="text-2xl">{{ user.username }}</span>
                 {% if current_user == user %}

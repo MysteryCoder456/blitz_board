@@ -241,9 +241,17 @@ def user_profile(user_id: int):
         else 0
     )
 
+    if user.avatar:
+        user_pfp = (
+            "/" + app.config["UPLOAD_FOLDER"].parts[-1] + f"/{user.avatar}"
+        )
+    else:
+        # Default profile picture
+        user_pfp = url_for("static", filename="images/default-pfp.jpg")
+
     return render_template(
         "user_profile.html",
-        default_pfp=url_for("static", filename="images/default-pfp.jpg"),
+        user_pfp=user_pfp,
         pencil=url_for("static", filename="images/pencil.png"),
         user=user,
         total_game_count=total_game_count,
@@ -280,6 +288,7 @@ def edit_profile():
         current_user.avatar = "/".join(img_filepath.parts[-2:])
         db.session.commit()
 
+        flash("Profile updated successfully!", "success")
         return redirect(
             url_for(
                 "auth.user_profile",
