@@ -45,14 +45,15 @@ class SignUpForm(FlaskForm):
             raise ValidationError("This username is already taken!")
 
 
-class ChangeAvatarForm(FlaskForm):
+class EditProfileForm(FlaskForm):
+    # TODO: add other profile related fields
     new_avatar = FileField(
         label="New Avatar",
         validators=[
             FileAllowed(
                 ["png", "jpg", "jpeg"],
                 "Please submit a valid PNG/JPEG file!",
-            )
+            ),
         ],
     )
     submit = SubmitField()
@@ -229,14 +230,21 @@ def user_profile(user_id: int):
     recent_sessions = user.sessions[:10]
     total_game_count = len(user.sessions)
 
-    avg_speed = int(sum([s.speed for s in user.sessions]) / total_game_count)
-    avg_speed_recent = int(
-        sum([s.speed for s in recent_sessions]) / len(recent_sessions)
+    avg_speed = (
+        int(sum([s.speed for s in user.sessions]) / total_game_count)
+        if total_game_count
+        else 0
+    )
+    avg_speed_recent = (
+        int(sum([s.speed for s in recent_sessions]) / len(recent_sessions))
+        if total_game_count
+        else 0
     )
 
     return render_template(
         "user_profile.html",
         default_pfp=url_for("static", filename="images/default-pfp.jpg"),
+        pencil=url_for("static", filename="images/pencil.png"),
         user=user,
         total_game_count=total_game_count,
         avg_speed=avg_speed,
@@ -247,8 +255,8 @@ def user_profile(user_id: int):
 
 @auth_bp.route("/profile/avatar", methods=["GET", "POST"])
 @login_required
-def change_avatar():
-    form = ChangeAvatarForm(request.form)
+def edit_profile():
+    form = EditProfileForm(request.form)
 
     if form.validate_on_submit():
         file = request.files[form.new_avatar.name]
@@ -279,7 +287,7 @@ def change_avatar():
             )
         )
 
-    return render_template("change_avatar.html", form=form)
+    return render_template("edit_profile.html", form=form)
 
 
 # TODO: show avatar in appropriate locations
