@@ -18,6 +18,7 @@ flask-wtf = "^1.1.1"
 yagmail = "^0.15.293"
 flask-socketio = "^5.3.4"
 simple-websocket = "^0.10.1"
+pillow = "^10.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"

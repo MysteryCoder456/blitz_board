@@ -14,6 +14,7 @@ from wtforms.fields import (
 )
 from wtforms.validators import Email, Length
 from flask_login import current_user, login_required, login_user, logout_user
+from PIL import Image
 
 from .. import db, app, smtp
 from .models import User, UnverifiedUser, MagicLink
@@ -267,26 +268,38 @@ def edit_profile():
     form = EditProfileForm(request.form)
 
     if form.validate_on_submit():
-        file = request.files[form.new_avatar.name]
+        # Change profile picture if file was uploaded
+        if file := request.files[form.new_avatar.name]:
+            img_name = file.filename
+            img_ext = img_name.split(".")[-1]  # type: ignore
+            img_filepath: Path = (
+                app.config["UPLOAD_FOLDER"]
+                / "avatars"
+                / f"{uuid4().hex}.{img_ext}"
+            )
 
-        img_name = file.filename
-        img_ext = img_name.split(".")[-1]  # type: ignore
-        img_filepath: Path = (
-            app.config["UPLOAD_FOLDER"]
-            / "avatars"
-            / f"{uuid4().hex}.{img_ext}"
-        )
+            # Crop image into box
+            image = Image.open(file.stream)
+            min_size_half = min(image.size) / 2
+            center = tuple(dim / 2 for dim in image.size)
+            crop_box = (
+                center[0] - min_size_half,
+                center[1] - min_size_half,
+                center[0] + min_size_half,
+                center[1] + min_size_half,
+            )
+            cropped_image = image.crop(crop_box)  # type: ignore
 
-        # Saving the file
-        file.save(img_filepath)  # type: ignore
+            # Saving the file
+            cropped_image.save(img_filepath, optimize=True)  # type: ignore
 
-        # Delete old avatar if it exists
-        if old_avatar := current_user.avatar:  # type: ignore
-            os.remove(app.config["UPLOAD_FOLDER"] / old_avatar)
+            # Delete old avatar if it exists
+            if old_avatar := current_user.avatar:  # type: ignore
+                os.remove(app.config["UPLOAD_FOLDER"] / old_avatar)
 
-        # Save new avatar filepath to database
-        current_user.avatar = "/".join(img_filepath.parts[-2:])
-        db.session.commit()
+            # Save new avatar filepath to database
+            current_user.avatar = "/".join(img_filepath.parts[-2:])
+            db.session.commit()
 
         flash("Profile updated successfully!", "success")
         return redirect(
