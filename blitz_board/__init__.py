@@ -15,6 +15,7 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["UPLOAD_FOLDER"] = Path(__file__).parent / "media"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DB_URI")
+app.config["VERIFY_PREFIX"] = os.getenv("VERIFY_PREFIX")
 
 csrf = CSRFProtect(app)
 db = SQLAlchemy(app)

@@ -98,9 +98,10 @@ def login():
                 "auth.verify_registration",
                 code=unverified_user.url_code.hex,
             )
-            verify_link = (
-                f"http://127.0.0.1:5000{endpoint}" if app.debug else ""
-            )  # TODO: Set else condition url for production
+            verify_prefix = (
+                app.config["VERIFY_PREFIX"] or "http://127.0.0.1:5000"
+            )
+            verify_link = f"{verify_prefix}{endpoint}"
 
             msg_content = [
                 "Click on this link to confirm and create a new account.",
@@ -137,9 +138,10 @@ def login():
                 "auth.verify_login",
                 code=magic_link.url_code.hex,
             )
-            verify_link = (
-                f"http://127.0.0.1:5000{endpoint}" if app.debug else ""
-            )  # TODO: Set else condition url for production
+            verify_prefix = (
+                app.config["VERIFY_PREFIX"] or "http://127.0.0.1:5000"
+            )
+            verify_link = f"{verify_prefix}{endpoint}"
 
             msg_content = [
                 "Click on this link to log into your account.",
