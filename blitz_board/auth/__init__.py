@@ -105,7 +105,7 @@ def login():
             msg_content = [
                 "Click on this link to confirm and create a new account.",
                 verify_link,
-                "Please do not share this link with anyone. Happy Puzzling! :)",
+                "Please do not share this link with anyone. Happy Typing! :)",
             ]
             smtp.send(
                 to=form.email.data,
@@ -144,7 +144,7 @@ def login():
             msg_content = [
                 "Click on this link to log into your account.",
                 verify_link,
-                "Please do not share this link with anyone. Happy Puzzling! :)",
+                "Please do not share this link with anyone. Happy Typing! :)",
             ]
             smtp.send(
                 to=form.email.data,
