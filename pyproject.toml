@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{include = "blitz_board"}]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 python-dotenv = "^1.0.0"
 psycopg2 = "^2.9.6"
 email-validator = "^2.0.0.post2"
