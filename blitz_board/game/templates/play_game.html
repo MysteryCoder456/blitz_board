@@ -24,7 +24,10 @@
         </div>
     </template>
 
-    <h1 align="center" class="text-lg mb-2" id="status-header">Waiting For Players</h1>
+    <div align="center" class="text-lg text-slate-500 mb-2">
+        <h1>Game Code: <span class="font-bold text-slate-400">{{ game.game_id }}</span></h1>
+        <h1 id="status-header">Waiting For Players</h1>
+    </div>
 
     <div id="player-list" class="mx-8 flex flex-col gap-3">
     </div>
