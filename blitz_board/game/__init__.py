@@ -22,6 +22,7 @@ from wtforms.validators import NumberRange
 
 from blitz_board import socketio, db
 from .models import SessionStats
+from ..auth.models import User
 
 START_COUNTDOWN: int = 5
 WORDS_PATH = Path(__file__).parents[1] / "NGSL_1.2_stats.csv"
@@ -110,6 +111,15 @@ def socket_connect(auth: dict):
     player = game_room.players[player_id]
     player.session_id = request.sid  # type: ignore
 
+    avatar = (
+        url_for("site_media", media_path=current_user.avatar)  # type: ignore
+        if current_user.is_authenticated  # type: ignore
+        else None
+    )
+
+    # Add new user to the room
+    join_room(game_id)
+
     # Notify existing players about new player
     emit(
         "player join",
@@ -117,20 +127,32 @@ def socket_connect(auth: dict):
             "player_id": player_id,
             "permanent_id": player.permanent_id,
             "username": player.username,
+            "avatar": avatar,
         },
         to=game_id,
     )
 
     # Notify new player about existing players
-    join_room(game_id)
-    player_list = [
-        {
-            "player_id": player_id,
-            "permanent_id": player.permanent_id,
-            "username": player.username,
-        }
-        for player_id, player in game_room.players.items()
-    ]
+    player_list = []
+
+    for p_id, p in game_room.players.items():
+        if p_id == player_id:
+            continue
+
+        avatar = None
+
+        if p.permanent_id:
+            user = db.session.get(User, p.permanent_id)
+            avatar = url_for("site_media", media_path=user.avatar)  # type: ignore
+
+        player_list.append(
+            {
+                "player_id": p_id,
+                "permanent_id": p.permanent_id,
+                "username": p.username,
+                "avatar": avatar,
+            }
+        )
     emit("player list", player_list)
 
 

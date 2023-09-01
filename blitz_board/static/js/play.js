@@ -35,14 +35,17 @@ function createPlayerCard(playerData) {
     const username = div.querySelector(".player-name");
     username.innerText = playerData.username;
 
+    if (playerData.avatar != null) {
+        const avatar = div.querySelector("img");
+        avatar.src = playerData.avatar;
+    }
+
     if (playerData.player_id === myID) {
         const youSpan = document.createElement("SPAN");
         youSpan.innerText = " (You)";
         youSpan.className = "text-slate-500";
         username.appendChild(youSpan);
     }
-
-    // TODO: Set profile picture too
 
     return newCard;
 }
