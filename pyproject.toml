@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Keyboard Warrior Haven"
 authors = ["Rehatbir Singh <rehatbir.singh@gmail.com>"]
 readme = "README.md"
-packages = [{include = "blitz_board"}]
+#packages = [{include = "blitz_board"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -19,11 +19,13 @@ yagmail = "^0.15.293"
 flask-socketio = "^5.3.4"
 simple-websocket = "^0.10.1"
 pillow = "^10.0.0"
+alembic = "^1.10.4"
+gunicorn = "^21.2.0"
+eventlet = "^0.33.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 ruff = "^0.0.262"
-alembic = "^1.10.4"
 
 [tool.poetry.scripts]
 start = "blitz_board:run"
