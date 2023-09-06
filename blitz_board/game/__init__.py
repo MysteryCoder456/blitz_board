@@ -113,7 +113,7 @@ def socket_connect(auth: dict):
 
     avatar = (
         url_for("site_media", media_path=current_user.avatar)  # type: ignore
-        if current_user.is_authenticated  # type: ignore
+        if current_user.is_authenticated and current_user.avatar  # type: ignore
         else None
     )
 
@@ -143,7 +143,11 @@ def socket_connect(auth: dict):
 
         if p.permanent_id:
             user = db.session.get(User, p.permanent_id)
-            avatar = url_for("site_media", media_path=user.avatar)  # type: ignore
+            avatar = (
+                url_for("site_media", media_path=user.avatar)
+                if user.avatar
+                else None
+            )
 
         player_list.append(
             {
