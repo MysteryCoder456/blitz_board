@@ -98,9 +98,7 @@ def login():
                 "auth.verify_registration",
                 code=unverified_user.url_code.hex,
             )
-            verify_prefix = (
-                app.config["VERIFY_PREFIX"] or "http://127.0.0.1:5000"
-            )
+            verify_prefix = app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
             verify_link = f"{verify_prefix}{endpoint}"
 
             msg_content = [
@@ -138,9 +136,7 @@ def login():
                 "auth.verify_login",
                 code=magic_link.url_code.hex,
             )
-            verify_prefix = (
-                app.config["VERIFY_PREFIX"] or "http://127.0.0.1:5000"
-            )
+            verify_prefix = app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
             verify_link = f"{verify_prefix}{endpoint}"
 
             msg_content = [

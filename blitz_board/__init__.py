@@ -15,12 +15,12 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["UPLOAD_FOLDER"] = Path(__file__).parent / "media"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DB_URI")
-app.config["VERIFY_PREFIX"] = os.getenv("VERIFY_PREFIX")
+app.config["HOST_ADDR"] = os.getenv("HOST_ADDR")
 
 csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 smtp = SMTP(os.getenv("SMTP_USERNAME"), os.getenv("SMTP_PASSWORD"))
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 login_manager = LoginManager(app)
 login_manager.login_view = "auth.login"  # type: ignore
