@@ -1,10 +1,19 @@
 services:
-  web:
-    build: .
+  nginx:
+    build: ./nginx/
     ports:
-      - "5001:5000"
+      - "8000:80"
     volumes:
       - site_media:/app/blitz_board/media
+      - static:/app/blitz_board/static
+    depends_on:
+      - web
+
+  web:
+    build: .
+    volumes:
+      - site_media:/app/blitz_board/media
+      - static:/app/blitz_board/static
     depends_on:
       - db
 
@@ -19,4 +28,5 @@ services:
 
 volumes:
   site_media: {}
+  static: {}
   database: {}
