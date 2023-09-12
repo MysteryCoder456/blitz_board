@@ -2,7 +2,7 @@ import csv
 from datetime import datetime, timedelta
 from pathlib import Path
 from dataclasses import dataclass, field
-from random import randint, choices
+from random import randint, choices, choice
 from time import time
 
 from flask import (
@@ -288,9 +288,32 @@ def test_complete(typed_sentence: str):
 
 
 @game_bp.route("/joinrandom")
+@login_required
 def join_random():
-    # TODO: Do this
-    return redirect(url_for("main.home"))
+    public_games = [g for g in games.values() if not (g.private and g.started)]
+
+    if not public_games:
+        flash("There are currently no public games available to join.", "warning")
+        return redirect(url_for("main.home"))
+
+    game = choice(public_games)
+    user_id = current_user.id
+    username = current_user.username
+
+    if len(game.players) >= game.player_limit:
+        flash("This game is full!", "warning")
+        return redirect(url_for("main.home"))
+
+    player_id = int(time() * 1000)
+    session["my_id"] = player_id
+    session["game_id"] = game.game_id
+
+    game.players[player_id] = Player(
+        permanent_id=user_id,
+        username=username,
+    )
+
+    return redirect(url_for("game.play_game", game_id=game.game_id))
 
 
 @game_bp.route("/play/<int:game_id>")
