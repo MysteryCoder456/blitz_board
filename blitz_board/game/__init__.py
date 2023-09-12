@@ -144,8 +144,8 @@ def socket_connect(auth: dict):
         if p.permanent_id:
             user = db.session.get(User, p.permanent_id)
             avatar = (
-                url_for("site_media", media_path=user.avatar)
-                if user.avatar
+                url_for("site_media", media_path=user.avatar)  # type: ignore
+                if user.avatar  # type: ignore
                 else None
             )
 
@@ -274,7 +274,7 @@ def test_complete(typed_sentence: str):
         to=game_room.game_id,
     )
 
-    # Checking if player is guest player or not
+    # Update user statistics
     if user_id := player.permanent_id:
         stats = SessionStats(
             game_id=game_room.game_id,
@@ -289,7 +289,7 @@ def test_complete(typed_sentence: str):
     # Remove player from players list
     game_room.players.pop(player_id)
 
-    # Delete game if all players left
+    # Delete game if all the players have left
     if not game_room.players:
         games.pop(game_room.game_id)
 
@@ -300,12 +300,14 @@ def join_random():
     public_games = [g for g in games.values() if not (g.private and g.started)]
 
     if not public_games:
-        flash("There are currently no public games available to join.", "warning")
+        flash(
+            "There are currently no public games available to join.", "warning"
+        )
         return redirect(url_for("main.home"))
 
     game = choice(public_games)
-    user_id = current_user.id
-    username = current_user.username
+    user_id = current_user.id  # type: ignore
+    username = current_user.username  # type: ignore
 
     if len(game.players) >= game.player_limit:
         flash("This game is full!", "warning")

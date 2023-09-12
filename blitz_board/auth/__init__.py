@@ -226,11 +226,11 @@ def user_profile(user_id: int):
         description="The requested user does not exist!",
     )
 
-    recent_sessions = user.sessions[:10]
-    total_game_count = len(user.sessions)
+    recent_sessions = user.sessions[:10]  # type: ignore
+    total_game_count = len(user.sessions)  # type: ignore
 
     avg_speed = (
-        int(sum([s.speed for s in user.sessions]) / total_game_count)
+        int(sum([s.speed for s in user.sessions]) / total_game_count)  # type: ignore
         if total_game_count
         else 0
     )
