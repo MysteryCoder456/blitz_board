@@ -238,17 +238,6 @@ def test_complete(typed_sentence: str):
     if not game_room.started:
         return
 
-    player_id: int | None = None
-    player: Player | None = None
-
-    for p_id, p in games[player_room].players.items():
-        if p.session_id == request.sid:  # type: ignore
-            player_id = p_id
-            player = p
-            break
-    else:
-        return
-
     time_taken = now - game_room.started_at  # type: ignore
     word_count = game_room.test_sentence.count(" ") + 1
     accuracy = min(len(typed_sentence) / len(game_room.test_sentence), 1)
@@ -263,6 +252,17 @@ def test_complete(typed_sentence: str):
     typing_speed = (
         accuracy * word_count / time_taken.total_seconds() * 60
     )  # in WPM
+
+    player_id: int | None = None
+    player: Player | None = None
+
+    for p_id, p in game_room.players.items():
+        if p.session_id == request.sid:  # type: ignore
+            player_id = p_id
+            player = p
+            break
+    else:
+        return
 
     emit(
         "test complete",
@@ -285,6 +285,13 @@ def test_complete(typed_sentence: str):
         )
         db.session.add(stats)
         db.session.commit()
+
+    # Remove player from players list
+    game_room.players.pop(player_id)
+
+    # Delete game if all players left
+    if not game_room.players:
+        games.pop(game_room.game_id)
 
 
 @game_bp.route("/joinrandom")
