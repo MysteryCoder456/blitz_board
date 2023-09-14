@@ -162,18 +162,23 @@ def socket_connect(auth: dict):
 
 @socketio.on("disconnect", namespace="/game")
 def socket_disconnect():
-    player_room = session["game_id"]
+    game_id = session["game_id"]
     player_id: int | None = None
+    game_room = games[game_id]
 
-    for p_id, p in games[player_room].players.items():
+    for p_id, p in game_room.players.items():
         if p.session_id == request.sid:  # type: ignore
             player_id = p_id
             break
     else:
         return
 
-    del games[player_room].players[player_id]
-    emit("player leave", player_id, to=player_room)
+    del game_room.players[player_id]
+    emit("player leave", player_id, to=game_id)
+
+    # Delete game if all the players have left
+    if not game_room.players:
+        del games[game_id]
 
 
 @socketio.on("test start", namespace="/game")
@@ -285,13 +290,6 @@ def test_complete(typed_sentence: str):
         )
         db.session.add(stats)
         db.session.commit()
-
-    # Remove player from players list
-    game_room.players.pop(player_id)
-
-    # Delete game if all the players have left
-    if not game_room.players:
-        games.pop(game_room.game_id)
 
 
 @game_bp.route("/joinrandom")
