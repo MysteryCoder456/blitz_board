@@ -308,6 +308,3 @@ def edit_profile():
         )
 
     return render_template("edit_profile.html", form=form)
-
-
-# TODO: show avatar in appropriate locations
