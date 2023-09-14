@@ -21,6 +21,12 @@
             <p>Total Games Played: {{ total_game_count }}</p>
             <p>Average Speed (All Time): {{ avg_speed }} WPM</p>
             <p>Average Speed (Recent): {{ avg_speed }} WPM</p>
+
+            {% if current_user != user %}
+                <div align="center" class="my-4">
+                    <a href="#" class="btn bg-[rgb(var(--neon-blue))]">Add Friend</a>
+                </div<
+            {% endif %}
         </div>
     </div>
 {% endblock main %}
