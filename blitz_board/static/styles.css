@@ -170,6 +170,20 @@ canvas {
     background: rgb(var(--neon-blue));
 }
 
+.chat-channel {
+    border-radius: 8px;
+    background: var(--night);
+    box-shadow: 0 3px 6px #0000006b;
+    padding: 18px 22px 18px 22px;
+
+    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+}
+
+.chat-channel:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 9px #0000006b;
+}
+
 #typing-area {
     user-select: none;
 }

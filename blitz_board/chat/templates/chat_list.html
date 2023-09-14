@@ -3,7 +3,22 @@
 {% block title %}Chats{% endblock title %}
 
 {% block main %}
-    <div>
-        <h1 class="text-2xl">Chats</h1>
-    </div>
+    <h1 class="text-2xl">Chats</h1>
+
+    {% if channels %}
+        <div class="mt-4">
+            {% for channel in channels %}
+                <div class="chat-channel">
+                    <p>{{ channel.name }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-slate-500">
+            <p>
+                You don't have any chats yet,
+                visit another user's profile to start chatting.
+            </p>
+        </div>
+    {% endif %}
 {% endblock main %}
