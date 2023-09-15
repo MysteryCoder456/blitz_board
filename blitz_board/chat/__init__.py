@@ -17,7 +17,17 @@ chat_bp = Blueprint(
 @chat_bp.route("/", methods=["GET"])
 @login_required
 def chat_list():
-    query = db.select(Channel)
-    all_channels = db.session.execute(query).scalars()
-    user_channels = [ch for ch in all_channels if current_user.id in ch.members]
-    return render_template("chat_list.html", channels=user_channels)
+    query = db.select(Channel).where(
+        (Channel.member_one == current_user)
+        | (Channel.member_two == current_user)
+    )
+    channels = db.session.execute(query).scalars().all()
+
+    for ch in channels:
+        if not ch.name:
+            if ch.member_one == current_user:
+                ch.name = ch.member_two.username
+            else:
+                ch.name = ch.member_one.username
+
+    return render_template("chat_list.html", channels=channels)

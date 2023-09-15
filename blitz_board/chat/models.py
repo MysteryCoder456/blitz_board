@@ -7,9 +7,13 @@ class Channel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=True)
-    members = db.Column(db.JSON, nullable=False, default=[])
+
+    member_one_id = db.Column(db.ForeignKey("users.id"), nullable=False)
+    member_two_id = db.Column(db.ForeignKey("users.id"), nullable=False)
 
     messages = db.relationship("Message", back_populates="channel")
+    member_one = db.relationship("User", foreign_keys=[member_one_id])
+    member_two = db.relationship("User", foreign_keys=[member_two_id])
 
 
 class Message(db.Model):

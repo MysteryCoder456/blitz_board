@@ -56,8 +56,8 @@ def downgrade() -> None:
         "messages",
         sa.Column("author", sa.INTEGER(), autoincrement=False, nullable=False),
     )
-    op.drop_constraint(None, "messages", type_="foreignkey")
-    op.drop_constraint(None, "messages", type_="foreignkey")
+    op.drop_constraint(None, "messages", type_="foreignkey")  # type: ignore
+    op.drop_constraint(None, "messages", type_="foreignkey")  # type: ignore
     op.create_foreign_key(
         "messages_author_fkey", "messages", "users", ["author"], ["id"]
     )
