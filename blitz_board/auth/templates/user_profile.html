@@ -23,9 +23,9 @@
             <p>Average Speed (Recent): {{ avg_speed }} WPM</p>
 
             {% if current_user != user and current_user.is_authenticated%}
-                <div align="center" class="my-5">
+                <div class="mt-5 flex flex-col items-center text-center">
                     <!-- TODO: url for adding friends -->
-                    <a href="#" class="btn bg-[rgb(var(--neon-blue))]">Add Friend</a>
+                    <a class="btn bg-[rgb(var(--neon-blue))]" href="#">Add Friend</a>
                 </div>
             {% endif %}
         </div>
