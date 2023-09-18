@@ -277,6 +277,7 @@ def user_profile(user_id: int):
             )
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
+        # TODO: Send an email notification to request receiver
         req = FriendRequest(from_id=current_user.id, to_id=user_id)  # type: ignore
         db.session.add(req)
         db.session.commit()
