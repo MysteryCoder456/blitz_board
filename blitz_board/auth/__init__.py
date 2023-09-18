@@ -277,10 +277,31 @@ def user_profile(user_id: int):
             )
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
-        # TODO: Send an email notification to request receiver
         req = FriendRequest(from_id=current_user.id, to_id=user_id)  # type: ignore
         db.session.add(req)
         db.session.commit()
+
+        current_profile = url_for(
+            "auth.user_profile",
+            user_id=current_user.id,  # type: ignore
+        )
+        current_profile_prefix = (
+            app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
+        )
+        current_profile_url = current_profile_prefix + current_profile
+
+        # Send email notification to request receiver
+        msg_content = [
+            f"Hey there, <b>{user.username}</b>!",
+            f'\n<a href="{current_profile_url}">{current_user.username}</a> would like to be your friend.',  # type: ignore
+            "\nRegards,",
+            "The Blitz Board Team",
+        ]
+        smtp.send(
+            to=user.email,
+            subject="New Friend Request on Blitz Board",
+            contents=msg_content,
+        )
 
         flash("Friend request has been sent!", "success")
         return redirect(url_for("auth.user_profile", user_id=user_id))

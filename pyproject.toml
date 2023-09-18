@@ -31,7 +31,7 @@ ruff = "^0.0.262"
 start = "blitz_board:run"
 
 [tool.ruff]
-ignore = ["E402"]
+ignore = ["E402", "E501"]
 
 [build-system]
 requires = ["poetry-core"]
