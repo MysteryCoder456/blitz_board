@@ -17,7 +17,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
 from .. import db, app, smtp
-from .models import User, UnverifiedUser, MagicLink
+from .models import User, UnverifiedUser, MagicLink, FriendRequest
 
 LINK_DURATION = timedelta(hours=2)
 
@@ -44,6 +44,10 @@ class SignUpForm(FlaskForm):
 
         if db.session.scalar(query):
             raise ValidationError("This username is already taken!")
+
+
+class FriendRequestForm(FlaskForm):
+    submit = SubmitField()
 
 
 class EditProfileForm(FlaskForm):
@@ -218,7 +222,7 @@ def logout():
     return redirect(url_for("main.home"))
 
 
-@auth_bp.route("/profile/<int:user_id>")
+@auth_bp.route("/profile/<int:user_id>", methods=["GET", "POST"])
 def user_profile(user_id: int):
     user: User = db.get_or_404(
         User,
@@ -248,6 +252,38 @@ def user_profile(user_id: int):
         # Default profile picture
         user_pfp = url_for("static", filename="images/default-pfp.jpg")
 
+    if current_user.is_authenticated:  # type: ignore
+        query = db.select(FriendRequest).where(
+            (FriendRequest.from_id == current_user.id)  # type: ignore
+            & (FriendRequest.to_id == user_id)
+        )
+        req = db.session.execute(query).scalar()
+        friend_req_sent = req is not None
+
+    else:
+        friend_req_sent = False
+
+    form = FriendRequestForm(request.form)
+
+    if form.validate_on_submit():
+        if not current_user.is_authenticated:  # type: ignore
+            flash("You must be logged in to send friend requests!", "warning")
+            return redirect(url_for("auth.user_profile", user_id=user_id))
+
+        if friend_req_sent:
+            flash(
+                "You have already sent a friend request to this user.",
+                "info",
+            )
+            return redirect(url_for("auth.user_profile", user_id=user_id))
+
+        req = FriendRequest(from_id=current_user.id, to_id=user_id)  # type: ignore
+        db.session.add(req)
+        db.session.commit()
+
+        flash("Friend request has been sent!", "success")
+        return redirect(url_for("auth.user_profile", user_id=user_id))
+
     return render_template(
         "user_profile.html",
         user_pfp=user_pfp,
@@ -257,6 +293,8 @@ def user_profile(user_id: int):
         avg_speed=avg_speed,
         avg_speed_recent=avg_speed_recent,
         recent_sessions=recent_sessions,
+        friend_req_sent=friend_req_sent,
+        form=form,
     )
 
 

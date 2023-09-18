@@ -23,10 +23,15 @@
             <p>Average Speed (Recent): {{ avg_speed }} WPM</p>
 
             {% if current_user != user and current_user.is_authenticated%}
-                <div class="mt-5 flex flex-col items-center text-center">
-                    <!-- TODO: url for adding friends -->
-                    <a class="btn bg-[rgb(var(--neon-blue))]" href="#">Add Friend</a>
-                </div>
+                <form class="mt-5 flex flex-col items-center text-center" method="post">
+                    {{ form.csrf_token }}
+
+                    {% if friend_req_sent %}
+                        <button class="btn btn-disabled bg-[rgb(var(--neon-blue))]" type="submit">Friend Request Sent</button>
+                    {% else %}
+                        <button class="btn bg-[rgb(var(--neon-blue))]" type="submit">Add Friend</button>
+                    {% endif %}
+                </form>
             {% endif %}
         </div>
     </div>

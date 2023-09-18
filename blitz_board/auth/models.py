@@ -14,12 +14,6 @@ class User(db.Model, UserMixin):
     avatar = db.Column(db.String, nullable=True)
 
     sessions = db.relationship("SessionStats", back_populates="user")
-    outgoing_requests = db.relationship(
-        "FriendRequest", back_populates="from_user"
-    )
-    incoming_requests = db.relationship(
-        "FriendRequest", back_populates="to_user"
-    )
 
     def __str__(self):
         return self.username
@@ -53,12 +47,8 @@ class FriendRequest(db.Model):
     timestamp = db.Column(
         db.DateTime(timezone=True),
         nullable=False,
-        default=current_timestamp,
+        default=current_timestamp(),
     )
 
-    from_user = db.relationship(
-        User, foreign_keys=[from_id], back_populates="outgoing_requests"
-    )
-    to_user = db.relationship(
-        User, foreign_keys=[to_id], back_populates="incoming_requests"
-    )
+    from_user = db.relationship(User, foreign_keys=[from_id])
+    to_user = db.relationship(User, foreign_keys=[to_id])
