@@ -320,7 +320,7 @@ def user_profile(user_id: int):
     )
 
 
-@auth_bp.route("/profile/avatar", methods=["GET", "POST"])
+@auth_bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
 def edit_profile():
     form = EditProfileForm(request.form)
