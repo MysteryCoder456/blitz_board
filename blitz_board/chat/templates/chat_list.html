@@ -8,7 +8,7 @@
     {% if channels %}
         <div class="mt-4">
             {% for channel in channels %}
-                <div class="chat-channel list-item">
+                <div class="chat-channel li">
                     <p>{{ channel.name }}</p>
                 </div>
             {% endfor %}
@@ -17,7 +17,7 @@
         <div class="text-slate-500">
             <p>
                 You don't have any chats yet,
-                add another user as a friend to start chatting.
+                your chats with friends will appear here.
             </p>
         </div>
     {% endif %}

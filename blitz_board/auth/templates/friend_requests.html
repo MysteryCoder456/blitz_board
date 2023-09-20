@@ -8,17 +8,35 @@
     {% if friend_reqs %}
         <div class="mt-4">
             {% for req in friend_reqs %}
-                <div class="friend-request list-item">
-                    <a class="underline underline-offset-2 decoration-[rgb(var(--neon-blue))]" href="{{ url_for("auth.user_profile", user_id=req.from_user.id) }}">
-                        {{ req.from_user.username }}
-                    </a>
+                <div class="friend-request li">
+                    <div class="flex flex-row items-center gap-4">
+                        {% if req.from_user.avatar %}
+                            {% set avatar = url_for("site_media", media_path=req.from_user.avatar) %}
+                        {% else %}
+                            {% set avatar = url_for("static", filename="images/default-pfp.jpg") %}
+                        {% endif %}
+
+                        <img
+                            src="{{ avatar }}"
+                            alt="{{ req.from_user.username }}'s Avatar"
+                            class="w-[64px] h-[64px] rounded-full"
+                            width="64px"
+                            height="64px"
+                        />
+                        <a
+                            class="underline underline-offset-4 decoration-[rgb(var(--neon-blue))]"
+                            href="{{ url_for("auth.user_profile", user_id=req.from_user.id) }}"
+                        >{{ req.from_user.username }}</a>
+                    </div>
+
+                    <button class="btn bg-[rgb(var(--spring-green))] text-[var(--gunmetal)]">Accept</button>
                 </div>
             {% endfor %}
         </div>
     {% else %}
         <div class="text-slate-500">
             <p>
-                You don't have any friend requests yet,
+                You don't have any pending friend requests,
                 visit another user's profile to add them as a friend.
             </p>
         </div>

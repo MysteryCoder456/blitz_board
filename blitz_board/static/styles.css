@@ -170,19 +170,18 @@ canvas {
     background: rgb(var(--neon-blue));
 }
 
-.list-item {
+.li {
     border-radius: 8px;
     background: var(--night);
     box-shadow: 0 3px 6px #0000006b;
     padding: 18px 22px 18px 22px;
     list-style-type: none;
-
-    transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
 }
 
-.list-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 9px #0000006b;
+.friend-request {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 #typing-area {
