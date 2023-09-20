@@ -368,3 +368,16 @@ def edit_profile():
         )
 
     return render_template("edit_profile.html", form=form)
+
+
+@auth_bp.route("/freqs", methods=["GET", "POST"])
+@login_required
+def friend_requests():
+    query = db.select(FriendRequest).where(
+        FriendRequest.to_user == current_user
+    )
+    friend_reqs = db.session.execute(query).scalars().all()
+    req_count = len(friend_reqs)
+    return render_template(
+        "friend_requests.html", req_count=req_count, friend_reqs=friend_reqs
+    )
