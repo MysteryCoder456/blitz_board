@@ -7,11 +7,7 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
 from wtforms import ValidationError
 from flask_wtf.file import FileField, FileAllowed
-from wtforms.fields import (
-    EmailField,
-    StringField,
-    SubmitField,
-)
+from wtforms.fields import EmailField, StringField, SubmitField, IntegerField
 from wtforms.validators import Email, Length
 from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
@@ -46,10 +42,6 @@ class SignUpForm(FlaskForm):
             raise ValidationError("This username is already taken!")
 
 
-class FriendRequestForm(FlaskForm):
-    submit = SubmitField()
-
-
 class EditProfileForm(FlaskForm):
     # TODO: add other profile related fields
     new_avatar = FileField(
@@ -64,6 +56,15 @@ class EditProfileForm(FlaskForm):
     submit = SubmitField()
 
     # TODO: Validation not working here
+
+
+class SendFriendRequestForm(FlaskForm):
+    submit = SubmitField()
+
+
+class AcceptFriendRequestForm(FlaskForm):
+    from_id = IntegerField()
+    submit = SubmitField()
 
 
 templates = Path(__file__).parent / "templates"
@@ -263,7 +264,7 @@ def user_profile(user_id: int):
     else:
         friend_req_sent = False
 
-    form = FriendRequestForm(request.form)
+    form = SendFriendRequestForm(request.form)
 
     if form.validate_on_submit():
         if not current_user.is_authenticated:  # type: ignore
@@ -373,13 +374,34 @@ def edit_profile():
 @auth_bp.route("/freqs", methods=["GET", "POST"])
 @login_required
 def friend_requests():
-    query = db.select(FriendRequest).where(
-        FriendRequest.to_user == current_user
+    form = AcceptFriendRequestForm(request.form)
+
+    if form.validate_on_submit():
+        # TODO: Add as friend
+
+        req = db.get_or_404(
+            FriendRequest,
+            (form.from_id.data, current_user.id),  # type: ignore
+        )
+
+        flash(
+            f"{req.from_user.username} has been added as a friend!",
+            "success",
+        )
+        db.session.delete(req)
+        db.session.commit()
+
+    query = (
+        db.select(FriendRequest)
+        .where(FriendRequest.to_user == current_user)
+        .order_by(FriendRequest.timestamp.desc())
     )
     friend_reqs = db.session.execute(query).scalars().all()
     req_count = len(friend_reqs)
+
     return render_template(
         "friend_requests.html",
+        form=form,
         req_count=req_count,
         friend_reqs=friend_reqs,
     )

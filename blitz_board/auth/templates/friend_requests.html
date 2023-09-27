@@ -6,6 +6,11 @@
     <h1 class="text-2xl">Friend Requests</h1>
 
     {% if friend_reqs %}
+        <form method="post" class="hidden">
+            {{ form.csrf_token }}
+            <input id="form-input" name="{{ form.from_id.name }}" />
+        </form>
+
         <div class="mt-4">
             {% for req in friend_reqs %}
                 <div class="friend-request li">
@@ -23,13 +28,24 @@
                             width="64px"
                             height="64px"
                         />
-                        <a
-                            class="underline underline-offset-4 decoration-[rgb(var(--neon-blue))]"
-                            href="{{ url_for("auth.user_profile", user_id=req.from_user.id) }}"
-                        >{{ req.from_user.username }}</a>
+
+                        <div class="flex flex-col xl:flex-row xl:gap-4">
+                            <a
+                                class="underline underline-offset-4 decoration-[rgb(var(--neon-blue))]"
+                                href="{{ url_for("auth.user_profile", user_id=req.from_user.id) }}"
+                            >{{ req.from_user.username }}</a>
+                            <span class="text-slate-500">
+                                Sent on {{ req.timestamp.strftime("%d %B %Y") }}
+                            </span>
+                        </div>
                     </div>
 
-                    <button class="btn bg-[rgb(var(--spring-green))] text-[var(--gunmetal)]">Accept</button>
+                    <button
+                        id="request-{{ req.from_id }}"
+                        class="accept-btn btn bg-[rgb(var(--spring-green))] text-[var(--gunmetal)]"
+                    >
+                        Accept
+                    </button>
                 </div>
             {% endfor %}
         </div>
@@ -42,3 +58,16 @@
         </div>
     {% endif %}
 {% endblock main %}
+
+{% block bodyend %}
+    <script>
+        const form = document.querySelector("form");
+        const form_input = document.querySelector("#form-input");
+
+        document.querySelector(".accept-btn").onclick = (ev) => {
+            let fromId = parseInt(ev.target.id.replace("request-", ""));
+            form_input.value = fromId;
+            form.submit();
+        };
+    </script>
+{% endblock bodyend %}
