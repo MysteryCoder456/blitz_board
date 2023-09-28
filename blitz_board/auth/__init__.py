@@ -13,7 +13,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from PIL import Image
 
 from .. import db, app, smtp
-from .models import User, UnverifiedUser, MagicLink, FriendRequest
+from .models import User, UnverifiedUser, MagicLink, FriendRequest, Friends
 
 LINK_DURATION = timedelta(hours=2)
 
@@ -264,11 +264,18 @@ def user_profile(user_id: int):
     else:
         friend_req_sent = False
 
+    if current_user.is_authenticated:
+        ...
+
     form = SendFriendRequestForm(request.form)
 
     if form.validate_on_submit():
         if not current_user.is_authenticated:  # type: ignore
             flash("You must be logged in to send friend requests!", "warning")
+            return redirect(url_for("auth.user_profile", user_id=user_id))
+
+        if Friends.check_friends(user_id, current_user.id):  # type: ignore
+            flash("You are already friends with this user.", "warning")
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
         if friend_req_sent:
@@ -317,6 +324,7 @@ def user_profile(user_id: int):
         avg_speed_recent=avg_speed_recent,
         recent_sessions=recent_sessions,
         friend_req_sent=friend_req_sent,
+        already_friend=already_friend,
         form=form,
     )
 
@@ -377,17 +385,21 @@ def friend_requests():
     form = AcceptFriendRequestForm(request.form)
 
     if form.validate_on_submit():
-        # TODO: Add as friend
-
         req = db.get_or_404(
             FriendRequest,
             (form.from_id.data, current_user.id),  # type: ignore
         )
 
+        # Add as friend
+        friend_record = Friends(left_id=req.from_id, right_id=req.to_id)
+        db.session.add(friend_record)
+
         flash(
             f"{req.from_user.username} has been added as a friend!",
             "success",
         )
+
+        # Delete friend request
         db.session.delete(req)
         db.session.commit()
 

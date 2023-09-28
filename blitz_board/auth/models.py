@@ -52,3 +52,30 @@ class FriendRequest(db.Model):
 
     from_user = db.relationship(User, foreign_keys=[from_id])
     to_user = db.relationship(User, foreign_keys=[to_id])
+
+
+class Friends(db.Model):
+    __tablename__ = "friends"
+
+    left_id = db.Column(db.ForeignKey(User.id), primary_key=True)
+    right_id = db.Column(db.ForeignKey(User.id), primary_key=True)
+
+    left_user = db.relationship(User, foreign_keys=[left_id])
+    right_user = db.relationship(User, foreign_keys=[right_id])
+
+    @classmethod
+    def check_friends(cls, left_id: int, right_id: int) -> bool:
+        """
+        Check whether two users are friends with each other or not.
+        `left_id` and `right_id` can be passed in any order.
+
+        @param left_id: First user's ID
+        @param right_id: Second user's ID
+        @returns: Whether or not the users are friends
+        """
+
+        query = db.select(cls).where(
+            ((cls.left_id == left_id) & (cls.right_id == right_id))
+            | ((cls.left_id == right_id) & (cls.right_id == left_id))
+        )
+        return db.session.execute(query).scalar_one_or_none() is not None
