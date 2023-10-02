@@ -291,12 +291,17 @@ def user_profile(user_id: int):
 
     if form.validate_on_submit():
         if not current_user.is_authenticated:  # type: ignore
-            flash("You must be logged in to send friend requests!", "warning")
+            flash(
+                "You must be logged in to perform social actions!", "warning"
+            )
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
         if friend_status == FriendStatus.friend:
-            # TODO: Handle friend removal
-            ...
+            Friends.remove_friends(current_user.id, user_id)  # type: ignore
+            db.session.commit()
+
+            flash(f"{user.username} is no longer your friend.", "info")
+            return redirect(url_for("auth.user_profile", user_id=user_id))
 
         if friend_status == FriendStatus.outgoing_request:
             flash(
@@ -306,8 +311,23 @@ def user_profile(user_id: int):
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
         if friend_status == FriendStatus.incoming_request:
-            # TODO: Handle incoming friend request
-            ...
+            # Accept incoming friend request
+            friend_record = Friends(left_id=user_id, right_id=current_user.id)  # type: ignore
+            db.session.add(friend_record)
+
+            # Delete friend request
+            query = db.delete(FriendRequest).where(
+                (FriendRequest.from_id == user_id)
+                & (FriendRequest.to_id == current_user.id)  # type: ignore
+            )
+            db.session.execute(query)
+            db.session.commit()
+
+            flash(
+                f"{user.username} is now your friend!",
+                "success",
+            )
+            return redirect(url_for("auth.user_profile", user_id=user_id))
 
         req = FriendRequest(from_id=current_user.id, to_id=user_id)  # type: ignore
         db.session.add(req)
@@ -418,7 +438,7 @@ def friend_requests():
         db.session.add(friend_record)
 
         flash(
-            f"{req.from_user.username} has been added as a friend!",
+            f"{req.from_user.username} is now your friend!",
             "success",
         )
 

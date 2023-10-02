@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Self
 from flask_login import UserMixin
 from sqlalchemy.sql.functions import current_timestamp
 
@@ -79,3 +79,20 @@ class Friends(db.Model):
             | ((cls.left_id == right_id) & (cls.right_id == left_id))
         )
         return db.session.execute(query).scalar_one_or_none() is not None
+
+    @classmethod
+    def remove_friends(cls, left_id: int, right_id: int):
+        """
+        Unfriends two users. Database deletions are not committed by
+        this function.
+        `left_id` and `right_id` can be passed in any order.
+
+        @param left_id: First user's ID
+        @param right_id: Second user's ID
+        """
+
+        query = db.delete(cls).where(
+            ((cls.left_id == left_id) & (cls.right_id == right_id))
+            | ((cls.left_id == right_id) & (cls.right_id == left_id))
+        )
+        db.session.execute(query)
