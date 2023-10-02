@@ -2,6 +2,7 @@ import os
 from datetime import timedelta, datetime
 from uuid import uuid4, UUID
 from pathlib import Path
+from enum import Enum
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
@@ -65,6 +66,13 @@ class SendFriendRequestForm(FlaskForm):
 class AcceptFriendRequestForm(FlaskForm):
     from_id = IntegerField()
     submit = SubmitField()
+
+
+class FriendStatus(Enum):
+    stranger = "stranger"
+    friend = "friend"
+    outgoing_request = "outgoing"
+    incoming_request = "incoming"
 
 
 templates = Path(__file__).parent / "templates"
@@ -253,19 +261,31 @@ def user_profile(user_id: int):
         # Default profile picture
         user_pfp = url_for("static", filename="images/default-pfp.jpg")
 
-    if current_user.is_authenticated:  # type: ignore
-        query = db.select(FriendRequest).where(
+    friend_status = FriendStatus.stranger
+
+    # Determine the users' relationship
+    if current_user.is_authenticated and current_user != user:  # type: ignore
+        outgoing_query = db.select(FriendRequest).where(
             (FriendRequest.from_id == current_user.id)  # type: ignore
             & (FriendRequest.to_id == user_id)
         )
-        req = db.session.execute(query).scalar()
-        friend_req_sent = req is not None
+        incoming_query = db.select(FriendRequest).where(
+            (FriendRequest.from_id == user_id)
+            & (FriendRequest.to_id == current_user.id)  # type: ignore
+        )
 
-    else:
-        friend_req_sent = False
+        if Friends.check_friends(current_user.id, user_id):  # type: ignore
+            # Users are already friends
+            friend_status = FriendStatus.friend
 
-    if current_user.is_authenticated:
-        ...
+        elif db.session.execute(outgoing_query).fetchone():
+            # Current user has sent friend request to viewed user
+            friend_status = FriendStatus.outgoing_request
+            print("omg")
+
+        elif db.session.execute(incoming_query).fetchone():
+            # Current user has received friend request from viewed user
+            friend_status = FriendStatus.incoming_request
 
     form = SendFriendRequestForm(request.form)
 
@@ -274,16 +294,20 @@ def user_profile(user_id: int):
             flash("You must be logged in to send friend requests!", "warning")
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
-        if Friends.check_friends(user_id, current_user.id):  # type: ignore
-            flash("You are already friends with this user.", "warning")
-            return redirect(url_for("auth.user_profile", user_id=user_id))
+        if friend_status == FriendStatus.friend:
+            # TODO: Handle friend removal
+            ...
 
-        if friend_req_sent:
+        if friend_status == FriendStatus.outgoing_request:
             flash(
                 "You have already sent a friend request to this user.",
                 "info",
             )
             return redirect(url_for("auth.user_profile", user_id=user_id))
+
+        if friend_status == FriendStatus.incoming_request:
+            # TODO: Handle incoming friend request
+            ...
 
         req = FriendRequest(from_id=current_user.id, to_id=user_id)  # type: ignore
         db.session.add(req)
@@ -323,8 +347,7 @@ def user_profile(user_id: int):
         avg_speed=avg_speed,
         avg_speed_recent=avg_speed_recent,
         recent_sessions=recent_sessions,
-        friend_req_sent=friend_req_sent,
-        already_friend=already_friend,
+        friend_status=friend_status,
         form=form,
     )
 
