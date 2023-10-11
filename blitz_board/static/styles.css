@@ -142,18 +142,18 @@ canvas {
     width: max-content;
 }
 
-.btn {
+.btn, a.btn {
     cursor: pointer;
     padding: 8px 10px;
     border-radius: 6px;
     transition: scale 0.1s;
 }
 
-.btn:hover {
+.btn:hover, a.btn:hover {
     scale: 107%;
 }
 
-.btn-disabled {
+.btn-disabled, a.btn-disabled {
     opacity: var(--disabled-opacity);
     cursor: not-allowed;
 }

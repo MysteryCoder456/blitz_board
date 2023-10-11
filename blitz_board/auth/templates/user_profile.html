@@ -22,23 +22,35 @@
             <p>Average Speed (All Time): {{ avg_speed }} WPM</p>
             <p>Average Speed (Recent): {{ avg_speed }} WPM</p>
 
-            {% if current_user != user and current_user.is_authenticated%}
-                <form class="mt-5 flex flex-col items-center text-center" method="post">
-                    {{ form.csrf_token }}
-                    {% set default_style = "btn bg-[rgb(var(--neon-blue))]" %}
-
-                    {% if friend_status.value == "friend" %}
-                        <button class="btn bg-[rgb(var(--red-munsell))]" type="submit">Remove Friend</button>
-                    {% elif friend_status.value == "outgoing" %}
-                        <button class="{{ default_style }} btn-disabled" type="button">Friend Request Sent</button>
-                    {% elif friend_status.value == "incoming" %}
-                        <button class="btn bg-[rgb(var(--spring-green))] text-[var(--gunmetal)]" type="submit">
-                            Accept Friend Request
-                        </button>
+            {% if current_user.is_authenticated %}
+                <div class="mt-5 text-center">
+                    {% if current_user == user %}
+                        <a
+                            href="{{ url_for("auth.friend_requests") }}"
+                            class="underline underline-offset-4"
+                        >
+                            Friend Requests
+                        </a>
                     {% else %}
-                        <button class="{{ default_style }}" type="submit">Add Friend</button>
+                        {% set default_style = "btn bg-[rgb(var(--neon-blue))]" %}
+
+                        <form class="flex flex-col items-center" method="post">
+                            {{ form.csrf_token }}
+
+                            {% if friend_status.value == "friend" %}
+                                <button class="btn bg-[rgb(var(--red-munsell))]" type="submit">Remove Friend</button>
+                            {% elif friend_status.value == "outgoing" %}
+                                <button class="{{ default_style }} btn-disabled" type="button">Friend Request Sent</button>
+                            {% elif friend_status.value == "incoming" %}
+                                <button class="btn bg-[rgb(var(--spring-green))] text-[var(--gunmetal)]" type="submit">
+                                    Accept Friend Request
+                                </button>
+                            {% else %}
+                                <button class="{{ default_style }}" type="submit">Add Friend</button>
+                            {% endif %}
+                        </form>
                     {% endif %}
-                </form>
+                </div>
             {% endif %}
         </div>
     </div>
