@@ -2,7 +2,7 @@ services:
   nginx:
     build: ./nginx/
     ports:
-      - "8000:80"
+      - "8000:443"
     volumes:
       - site_media:/app/blitz_board/media
       - static:/app/blitz_board/static

@@ -12,5 +12,6 @@ COPY ./pyproject.toml .
 RUN ${VENV_PATH}/bin/poetry install
 
 COPY . .
+COPY ./nginx/ssl/ /etc/ssl/
 RUN chmod +x ./docker-entrypoint.sh
 ENTRYPOINT [ "./docker-entrypoint.sh" ]
