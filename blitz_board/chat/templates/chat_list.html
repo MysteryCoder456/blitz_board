@@ -9,7 +9,17 @@
         <div class="mt-4">
             {% for channel in channels %}
                 <div class="chat-channel li">
-                    <p>{{ channel.name }}</p>
+                    <p class="underline underline-offset-4 decoration-[rgb(var(--neon-blue))]">
+                        {% if channel.member_one == current_user %}
+                            <a href="{{ url_for('chat.chat_page', user_id=channel.member_two_id) }}">
+                                {{ channel.name }}
+                            </a>
+                        {% else %}
+                            <a href="{{ url_for('chat.chat_page', user_id=channel.member_one_id) }}">
+                                {{ channel.name }}
+                            </a>
+                        {% endif %}
+                    </p>
                 </div>
             {% endfor %}
         </div>
