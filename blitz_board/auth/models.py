@@ -1,4 +1,4 @@
-from typing import Optional, Self
+from typing import Optional
 from flask_login import UserMixin
 from sqlalchemy.sql.functions import current_timestamp
 
