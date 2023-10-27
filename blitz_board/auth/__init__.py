@@ -15,6 +15,7 @@ from PIL import Image
 
 from .. import db, app, smtp
 from .models import User, UnverifiedUser, MagicLink, FriendRequest, Friends
+from .signals import friend_added
 
 LINK_DURATION = timedelta(hours=2)
 
@@ -175,9 +176,7 @@ def login():
 
 @auth_bp.route("/v-reg/<code>", methods=["GET", "POST"])
 def verify_registration(code: str):
-    query = db.select(UnverifiedUser).where(
-        UnverifiedUser.url_code == UUID(code)
-    )
+    query = db.select(UnverifiedUser).where(UnverifiedUser.url_code == UUID(code))
     unverified_user = db.one_or_404(query)
 
     if unverified_user.valid_until < datetime.now():
@@ -254,9 +253,7 @@ def user_profile(user_id: int):
     )
 
     if user.avatar:
-        user_pfp = (
-            "/" + app.config["UPLOAD_FOLDER"].parts[-1] + f"/{user.avatar}"
-        )
+        user_pfp = "/" + app.config["UPLOAD_FOLDER"].parts[-1] + f"/{user.avatar}"
     else:
         # Default profile picture
         user_pfp = url_for("static", filename="images/default-pfp.jpg")
@@ -281,7 +278,6 @@ def user_profile(user_id: int):
         elif db.session.execute(outgoing_query).fetchone():
             # Current user has sent friend request to viewed user
             friend_status = FriendStatus.outgoing_request
-            print("omg")
 
         elif db.session.execute(incoming_query).fetchone():
             # Current user has received friend request from viewed user
@@ -291,9 +287,7 @@ def user_profile(user_id: int):
 
     if form.validate_on_submit():
         if not current_user.is_authenticated:  # type: ignore
-            flash(
-                "You must be logged in to perform social actions!", "warning"
-            )
+            flash("You must be logged in to perform social actions!", "warning")
             return redirect(url_for("auth.user_profile", user_id=user_id))
 
         if friend_status == FriendStatus.friend:
@@ -323,6 +317,9 @@ def user_profile(user_id: int):
             db.session.execute(query)
             db.session.commit()
 
+            # Notify signal subscribers
+            friend_added.send(app, left_id=user_id, right_id=current_user.id)  # type: ignore
+
             flash(
                 f"{user.username} is now your friend!",
                 "success",
@@ -337,9 +334,7 @@ def user_profile(user_id: int):
             "auth.user_profile",
             user_id=current_user.id,  # type: ignore
         )
-        current_profile_prefix = (
-            app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
-        )
+        current_profile_prefix = app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
         current_profile_url = current_profile_prefix + current_profile
 
         # Send email notification to request receiver
@@ -383,9 +378,7 @@ def edit_profile():
             img_name = file.filename
             img_ext = img_name.split(".")[-1]  # type: ignore
             img_filepath: Path = (
-                app.config["UPLOAD_FOLDER"]
-                / "avatars"
-                / f"{uuid4().hex}.{img_ext}"
+                app.config["UPLOAD_FOLDER"] / "avatars" / f"{uuid4().hex}.{img_ext}"
             )
 
             # Crop image into box
@@ -434,8 +427,11 @@ def friend_requests():
         )
 
         # Add as friend
-        friend_record = Friends(left_id=req.from_id, right_id=req.to_id)
+        friend_record = Friends(left_id=req.from_id, right_id=req.to_id)  # type: ignore
         db.session.add(friend_record)
+
+        # Notify signal subscribers
+        friend_added.send(app, left_id=req.from_id, right_id=req.to_id)  # type: ignore
 
         flash(
             f"{req.from_user.username} is now your friend!",

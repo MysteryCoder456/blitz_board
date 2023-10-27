@@ -2,9 +2,10 @@ from pathlib import Path
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 
-from .. import db
+from .. import app, db
 from .models import Channel
 from ..auth.models import User
+from ..auth.signals import friend_added
 
 templates = Path(__file__).parent / "templates"
 chat_bp = Blueprint(
@@ -13,6 +14,12 @@ chat_bp = Blueprint(
     url_prefix="/chat",
     template_folder=templates,
 )
+
+
+@friend_added.connect_via(app)
+def create_chat_channel(sender, left_id, right_id, **extra):
+    # TODO: Create a channel for two users
+    ...
 
 
 @chat_bp.route("/", methods=["GET"])
