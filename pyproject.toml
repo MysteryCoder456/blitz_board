@@ -11,7 +11,7 @@ python = "^3.9"
 python-dotenv = "^1.0"
 psycopg2 = "^2.9"
 email-validator = "^2.0.0.post2"
-flask-login = { git = "https://github.com/maxcountryman/flask-login", rev = "7d98a49" }
+flask-login = { git = "https://github.com/maxcountryman/flask-login", rev = "2204b4e" }
 flask = "^2.3"
 flask-sqlalchemy = "^3.0"
 flask-wtf = "^1.1"
