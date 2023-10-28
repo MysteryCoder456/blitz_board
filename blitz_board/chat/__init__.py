@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 
@@ -17,9 +18,11 @@ chat_bp = Blueprint(
 
 
 @friend_added.connect_via(app)
-def create_chat_channel(sender, left_id, right_id, **extra):
-    # TODO: Create a channel for two users
-    ...
+def create_chat_channel(sender: Any, left_id: int, right_id: int, **extra):
+    # Create a channel for the two users
+    new_channel = Channel(member_one_id=left_id, member_two_id=right_id)  # type: ignore
+    db.session.add(new_channel)
+    db.session.commit()
 
 
 @chat_bp.route("/", methods=["GET"])
