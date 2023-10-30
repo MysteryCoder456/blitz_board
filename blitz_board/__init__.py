@@ -43,4 +43,9 @@ def site_media(media_path: str):
 
 
 def run():
-    socketio.run(app, use_reloader=True, debug=True)
+    socketio.run(
+        app,
+        use_reloader=True,
+        debug=True,
+        log_output=True,
+    )

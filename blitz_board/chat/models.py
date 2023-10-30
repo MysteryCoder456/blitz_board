@@ -31,4 +31,5 @@ class Message(db.Model):
         nullable=False,
     )
 
+    author = db.relationship("User")
     channel = db.relationship("Channel", back_populates="messages")

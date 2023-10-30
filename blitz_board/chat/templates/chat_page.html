@@ -1,10 +1,62 @@
 {% extends 'base.html' %}
 
-{% block title %}Chat with {{ user.username }}{% endblock title %}
+{% block title %}
+    Chat with {{ user.username }}
+{% endblock title %}
 
 {% block main %}
+    <template id="msg-template">
+        <div class="message flex flex-col justify-start">
+            <div class="flex flex-row items-center gap-3">
+                <img 
+                    width=40 height=38
+                    class="rounded-full"
+                    src="{{ url_for('static' , filename='images/default-pfp.jpg') }}"
+                />
+                <p class="msg-author text-slate-500 text-base">
+                    <span>John Doe</span>
+                </p>
+            </div>
+
+            <p class="msg-content ms-[50px]">
+                <span>Hello, world!</span>
+            </p>
+        </div>
+    </template>
+
     <h1 class="text-2xl">Chat with {{ user.username }}</h1>
 
-    <p class="text-slate-500">Coming Soon...</p>
+    <div class="msg-box bg-[var(--night)] p-4 my-3 rounded-md flex flex-col gap-2">
+        {% for msg in messages %}
+            {% if msg.author == current_user %}
+                {% set dir = "rtl" %}
+            {% else %}
+                {% set dir = "ltr" %}
+            {% endif %}
+
+            {% if msg.author.avatar %}
+                {% set author_avatar = url_for("site_media", media_path=msg.author.avatar) %}
+            {% else %}
+                {% set author_avatar = url_for("static", filename="images/default-pfp.jpg") %}
+            {% endif %}
+
+            <div id="msg-{{ msg.id }}" class="message flex flex-col justify-start" dir={{ dir }}>
+                <div class="flex flex-row items-center gap-3">
+                    <img 
+                        width=40 height=38
+                        class="rounded-full"
+                        src="{{ author_avatar }}"
+                    />
+                    <p class="msg-author text-slate-500 text-base">
+                        <span>{{ msg.author.username }}</span>
+                    </p>
+                </div>
+
+                <p class="msg-content ms-[50px]">
+                    <span dir="ltr">{{ msg.content }}</span>
+                </p>
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock main %}
