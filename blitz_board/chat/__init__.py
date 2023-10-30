@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, url_for
 from flask_login import login_required, current_user
 
 from .. import app, db
@@ -67,4 +67,5 @@ def chat_page(user_id: int):
         user=user,
         channel=channel,
         messages=messages,
+        chat_script=url_for("static", filename="js/chat.js"),
     )

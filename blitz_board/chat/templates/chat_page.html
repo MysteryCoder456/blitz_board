@@ -3,30 +3,40 @@
 {% block title %}
     Chat with {{ user.username }}
 {% endblock title %}
+    
+{% block head %}
+    <script src="{{ socket_io }}"></script>
+{% endblock head %}
 
 {% block main %}
     <template id="msg-template">
-        <div class="message flex flex-col justify-start">
+        <div id="msg-0" class="message flex flex-col justify-start">
             <div class="flex flex-row items-center gap-3">
                 <img 
-                    width=40 height=38
+                    width=40 height=40
                     class="rounded-full"
                     src="{{ url_for('static' , filename='images/default-pfp.jpg') }}"
                 />
-                <p class="msg-author text-slate-500 text-base">
-                    <span>John Doe</span>
+                <p class="text-slate-500 text-sm" dir="ltr">
+                    <span class="msg-author">
+                        <b>John Doe</b>
+                    </span>
+                    <br>
+                    <span class="msg-timestamp" dir="ltr">
+                        12:00 AM on 01 Jan 1970
+                    </span>
                 </p>
             </div>
 
             <p class="msg-content ms-[50px]">
-                <span>Hello, world!</span>
+                <span dir="ltr">Hello, world!</span>
             </p>
         </div>
     </template>
 
     <h1 class="text-2xl">Chat with {{ user.username }}</h1>
 
-    <div class="msg-box bg-[var(--night)] p-4 my-3 rounded-lg flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
+    <div id="msg-box" class="bg-[var(--night)] p-4 my-3 rounded-lg flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
         {% for msg in messages %}
             {% if msg.author == current_user %}
                 {% set dir = "rtl" %}
@@ -43,12 +53,18 @@
             <div id="msg-{{ msg.id }}" class="message flex flex-col justify-start" dir={{ dir }}>
                 <div class="flex flex-row items-center gap-3">
                     <img 
-                        width=40 height=38
+                        width=40 height=40
                         class="rounded-full"
                         src="{{ author_avatar }}"
                     />
-                    <p class="msg-author text-slate-500 text-base">
-                        <span>{{ msg.author.username }}</span>
+                    <p class="text-slate-500 text-sm">
+                        <span class="msg-author" dir="ltr">
+                            <b>{{ msg.author.username }}</b>
+                        </span>
+                        <br>
+                        <span class="msg-timestamp" dir="ltr">
+                            {{ msg.timestamp.strftime("%I:%M %p on %m %b %Y") }}
+                        </span>
                     </p>
                 </div>
 
@@ -65,3 +81,7 @@
     </div>
 
 {% endblock main %}
+
+{% block bodyend %}
+    <script src="{{ chat_script }}"></script>
+{% endblock bodyend %}
