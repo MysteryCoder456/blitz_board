@@ -6,6 +6,9 @@
     
 {% block head %}
     <script src="{{ socket_io }}"></script>
+    <script>
+        const channelId = {{ channel.id }};
+    </script>
 {% endblock head %}
 
 {% block main %}
@@ -76,7 +79,7 @@
     </div>
 
     <div class="grid grid-cols-6 gap-3">
-        <input class="col-span-5 px-3" type="text" placeholder="Type Message..." />
+        <input id="send-input" class="col-span-5 px-3" type="text" placeholder="Type Message..." />
         <button id="send-btn" type="submit" class="btn bg-[rgb(var(--neon-blue))]">Send</button>
     </div>
 
