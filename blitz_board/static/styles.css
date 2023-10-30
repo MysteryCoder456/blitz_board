@@ -51,9 +51,10 @@ input:not([type="file"]) {
     box-shadow: 0 3px 6px #0000006b;
 }
 
-input:hover {
+input:hover, input:focus {
     transform: translateY(-3px);
     box-shadow: 0 8px 9px #0000006b;
+    outline: none;
 }
 
 input[type="submit"] {

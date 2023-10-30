@@ -26,7 +26,7 @@
 
     <h1 class="text-2xl">Chat with {{ user.username }}</h1>
 
-    <div class="msg-box bg-[var(--night)] p-4 my-3 rounded-md flex flex-col gap-2">
+    <div class="msg-box bg-[var(--night)] p-4 my-3 rounded-lg flex flex-col gap-2 max-h-[60vh] overflow-y-auto">
         {% for msg in messages %}
             {% if msg.author == current_user %}
                 {% set dir = "rtl" %}
@@ -57,6 +57,11 @@
                 </p>
             </div>
         {% endfor %}
+    </div>
+
+    <div class="grid grid-cols-6 gap-3">
+        <input class="col-span-5 px-3" type="text" placeholder="Type Message..." />
+        <button id="send-btn" type="submit" class="btn bg-[rgb(var(--neon-blue))]">Send</button>
     </div>
 
 {% endblock main %}
