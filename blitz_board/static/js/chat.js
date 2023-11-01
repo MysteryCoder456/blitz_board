@@ -1,3 +1,4 @@
+const msgTemplate = document.querySelector("#msg-template");
 const msgBox = document.querySelector("#msg-box");
 const sendInput = document.querySelector("#send-input");
 const sendBtn = document.querySelector("#send-btn");
@@ -27,3 +28,25 @@ document.onkeydown = (ev) => {
         sendMessage();
     }
 }
+
+socket.on("new message", (msg) => {
+    const msgEl = msgTemplate.content.cloneNode(true);
+
+    const div = msgEl.querySelector(".message");
+    div.id = `msg-${msg.id}`;
+
+    if (msg.author_id === myId) {
+        div.dir = "rtl"
+    }
+
+    msgEl.querySelector(".msg-author").innerText = msg.author;
+    msgEl.querySelector(".msg-timestamp").innerText = msg.timestamp;
+    msgEl.querySelector(".msg-content").innerText = msg.content;
+
+    if (msg.author_avatar) {
+        msgEl.querySelector("img").src = msg.author_avatar;
+    }
+
+    msgBox.appendChild(msgEl);
+    msgBox.scrollTop = msgBox.scrollHeight + 50;
+});

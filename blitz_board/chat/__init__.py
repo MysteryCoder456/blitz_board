@@ -61,6 +61,8 @@ def on_send(msg_content: str):
         channel=channel,
         content=msg_content.strip(),
     )
+    db.session.add(new_msg)
+    db.session.commit()
 
     author_avatar = (
         url_for("site_media", media_path=new_msg.author.avatar)
@@ -68,15 +70,15 @@ def on_send(msg_content: str):
         else None
     )
     new_msg_json = {
+        "id": new_msg.id,
+        "author_id": new_msg.author_id,
         "author": new_msg.author.username,
         "author_avatar": author_avatar,
         "content": new_msg.content,
-        "timestamp": new_msg.timestamp,
+        "timestamp": new_msg.timestamp.strftime("%I:%M %p on %m %b %Y"),
     }
 
     emit("new message", new_msg_json, to=channel.id)
-    db.session.add(new_msg)
-    db.session.commit()
 
 
 @chat_bp.route("/", methods=["GET"])

@@ -7,23 +7,22 @@
 {% block head %}
     <script src="{{ socket_io }}"></script>
     <script>
+        const myId = {{ current_user.id }};
         const channelId = {{ channel.id }};
     </script>
 {% endblock head %}
 
 {% block main %}
     <template id="msg-template">
-        <div id="msg-0" class="message flex flex-col justify-start">
+        <div id="msg-0" class="message flex flex-col justify-start" dir="ltr">
             <div class="flex flex-row items-center gap-3">
                 <img 
                     width=40 height=40
                     class="rounded-full"
                     src="{{ url_for('static' , filename='images/default-pfp.jpg') }}"
                 />
-                <p class="text-slate-500 text-sm" dir="ltr">
-                    <span class="msg-author">
-                        <b>John Doe</b>
-                    </span>
+                <p class="text-slate-500 text-sm">
+                    <b><span class="msg-author">John Doe</span></b>
                     <br>
                     <span class="msg-timestamp" dir="ltr">
                         12:00 AM on 01 Jan 1970
@@ -31,8 +30,8 @@
                 </p>
             </div>
 
-            <p class="msg-content ms-[50px]">
-                <span dir="ltr">Hello, world!</span>
+            <p class="ms-[50px]">
+                <span dir="ltr" class="msg-content">Hello, world!</span>
             </p>
         </div>
     </template>
@@ -61,9 +60,7 @@
                         src="{{ author_avatar }}"
                     />
                     <p class="text-slate-500 text-sm">
-                        <span class="msg-author" dir="ltr">
-                            <b>{{ msg.author.username }}</b>
-                        </span>
+                        <b><span class="msg-author">{{ msg.author.username }}</span></b>
                         <br>
                         <span class="msg-timestamp" dir="ltr">
                             {{ msg.timestamp.strftime("%I:%M %p on %m %b %Y") }}
