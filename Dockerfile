@@ -18,5 +18,6 @@ RUN ${VENV_PATH}/bin/poetry install
 # Setup app diretories & entrypoint
 COPY . .
 COPY ./nginx/ssl/ /etc/ssl/
+RUN mkdir /app/blitz_board/media
 RUN chmod +x ./docker-entrypoint.sh
 ENTRYPOINT [ "./docker-entrypoint.sh" ]
