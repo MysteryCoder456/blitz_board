@@ -62,7 +62,7 @@ def on_send(msg_content: str):
         content=msg_content.strip(),
     )
     db.session.add(new_msg)
-    db.session.commit()
+    db.session.flush()
 
     author_avatar = (
         url_for("site_media", media_path=new_msg.author.avatar)
@@ -79,6 +79,7 @@ def on_send(msg_content: str):
     }
 
     emit("new message", new_msg_json, to=channel.id)
+    db.session.commit()
 
 
 @chat_bp.route("/", methods=["GET"])
