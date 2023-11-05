@@ -1,6 +1,6 @@
 from pathlib import Path
 from typing import Any
-from flask import Blueprint, render_template, url_for
+from flask import Blueprint, render_template, url_for, make_response
 from flask_login import login_required, current_user
 from flask_socketio import emit, join_room
 
@@ -22,7 +22,28 @@ open_channels: dict[int, Channel] = {}
 
 @friend_added.connect_via(app)
 def create_chat_channel(sender: Any, left_id: int, right_id: int, **extra):
-    # Create a channel for the two users
+    """
+    Create a channel for two users if one doesn't exist.
+    `left_id` and `right_id` are interchangeable.
+
+    @param 'left_id': First user's ID
+    @param 'right_id': Second user's ID
+    """
+
+    query = db.select(Channel).where(
+        (
+            (Channel.member_one_id == left_id)
+            & (Channel.member_two_id == right_id)
+        )
+        | (
+            (Channel.member_one_id == right_id)
+            & (Channel.member_two_id == left_id)
+        )
+    )
+
+    if len(db.session.execute(query).all()):
+        return
+
     new_channel = Channel(member_one_id=left_id, member_two_id=right_id)  # type: ignore
     db.session.add(new_channel)
     db.session.commit()
@@ -101,16 +122,17 @@ def chat_list():
     return render_template("chat_list.html", channels=channels)
 
 
-@chat_bp.route("/<int:user_id>", methods=["GET", "POST"])
+@chat_bp.route("/<int:channel_id>", methods=["GET", "POST"])
 @login_required
-def chat_page(user_id: int):
-    user = db.get_or_404(User, user_id)
+def chat_page(channel_id):
+    channel: Channel = db.get_or_404(Channel, channel_id)
 
-    channel_query = db.select(Channel).where(
-        ((Channel.member_one == current_user) & (Channel.member_two == user))
-        | ((Channel.member_one == user) & (Channel.member_two == current_user))
-    )
-    channel: Channel = db.one_or_404(channel_query)
+    if channel.member_one == current_user:
+        user = channel.member_two
+    elif channel.member_two == current_user:
+        user = channel.member_one
+    else:
+        return make_response("You cannot access this channel!", 403)
 
     messages_query = (
         db.select(Message)
