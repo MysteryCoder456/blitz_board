@@ -21,9 +21,14 @@ def global_leaderboard():
         db.select(User, func.max(SessionStats.speed))
         .where(User.id == SessionStats.user_id)
         .group_by(User.id)
-        .order_by(func.max(SessionStats.speed))
+        .order_by(func.max(SessionStats.speed).desc())
     )
-    ranked_players = db.session.execute(query).scalars()
+    ranked_players = db.session.execute(query).all()
+    print(list(ranked_players))
 
-    # TODO:
-    return render_template("leaderboard.html")
+    return render_template(
+        "leaderboard.html",
+        ranked_players=ranked_players,
+        enumerate=enumerate,
+        round=round,
+    )
