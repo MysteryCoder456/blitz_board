@@ -295,7 +295,7 @@ def test_complete(typed_sentence: str):
 @game_bp.route("/joinrandom")
 @login_required
 def join_random():
-    public_games = [g for g in games.values() if not (g.private and g.started)]
+    public_games = [g for g in games.values() if not (g.private or g.started)]
 
     if not public_games:
         flash(
