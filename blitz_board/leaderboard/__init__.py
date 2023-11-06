@@ -24,7 +24,6 @@ def global_leaderboard():
         .order_by(func.max(SessionStats.speed).desc())
     )
     ranked_players = db.session.execute(query).all()
-    print(list(ranked_players))
 
     return render_template(
         "leaderboard.html",
