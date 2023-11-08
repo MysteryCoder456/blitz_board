@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {{ lb_name }} Leaderboards
+    {{ lb_name }} Leaderboard
 {% endblock title %}
 
 {% block main %}
-    <h1 class="text-2xl">{{ lb_name }} Leaderboards</h1>
+    <h1 class="text-2xl">{{ lb_name }} Leaderboard</h1>
 
     <div class="flex gap-1 text-center my-4 px-1 py-1 bg-[var(--night)] rounded-xl">
         <a href="{{ url_for('leaderboard.global_lb') }}" class="w-full py-1 rounded-lg transition-colors {% if lb_name != 'Global' %}hover:{% endif %}bg-[var(--gunmetal)]">
@@ -34,7 +34,7 @@
                 {% set outline = "transparent" %}
             {% endif %}
 
-            {% if player == current_user %}
+            {% if current_user.is_authenticated and player == current_user %}
             <div class="ranked-player li flex flex-row items-center gap-6 border border-slate-500">
             {% else %}
             <div class="ranked-player li flex flex-row items-center gap-6">

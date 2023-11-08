@@ -1,6 +1,6 @@
 from pathlib import Path
 from flask import Blueprint, render_template
-from flask_login import current_user
+from flask_login import current_user, login_required
 from sqlalchemy.sql import func
 
 from .. import db
@@ -37,6 +37,7 @@ def global_lb():
 
 
 @leaderboard_bp.route("/friends")
+@login_required
 def friends_lb():
     # Retreive friend IDs
     friends_query = db.select(Friends).where(
