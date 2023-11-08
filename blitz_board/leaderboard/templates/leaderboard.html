@@ -1,9 +1,20 @@
 {% extends 'base.html' %}
 
-{% block title %}Leaderboards{% endblock title %}
+{% block title %}
+    {{ lb_name }} Leaderboards
+{% endblock title %}
 
 {% block main %}
-    <h1 class="text-2xl">Leaderboards</h1>
+    <h1 class="text-2xl">{{ lb_name }} Leaderboards</h1>
+
+    <div class="flex gap-1 text-center my-4 px-1 py-1 bg-[var(--night)] rounded-xl">
+        <a href="{{ url_for('leaderboard.global_lb') }}" class="w-full py-1 rounded-lg transition-colors {% if lb_name != 'Global' %}hover:{% endif %}bg-[var(--gunmetal)]">
+            Global
+        </a>
+        <a href="{{ url_for('leaderboard.friends_lb') }}" class="w-full py-1 rounded-lg transition-colors {% if lb_name != 'Friends' %}hover:{% endif %}bg-[var(--gunmetal)]">
+            Friends
+        </a>
+    </div>
 
     <div class="mt-4 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
         {% for i, (player, max_speed) in enumerate(ranked_players) %}

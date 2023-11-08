@@ -19,7 +19,7 @@
                 <a class="site-name text-xl me-5" href="{{ url_for('main.home') }}">Blitz Board</a>
                 <a class="nav-link text-xl" href="{{ url_for('main.home') }}">Home</a>
                 <a class="nav-link text-xl" href="{{ url_for('chat.chat_list') }}">Chat</a>
-                <a class="nav-link text-xl" href="{{ url_for('leaderboard.global_leaderboard') }}">Leaderboards</a>
+                <a class="nav-link text-xl" href="{{ url_for('leaderboard.global_lb') }}">Leaderboards</a>
             </div>
             <div class="text-right row-start-1">
                 {% if current_user.is_authenticated %}
