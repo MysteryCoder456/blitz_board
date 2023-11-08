@@ -14,6 +14,7 @@ load_dotenv()
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
 app.config["UPLOAD_FOLDER"] = Path(__file__).parent / "media"
+app.config["STATIC_FOLDER"] = Path(__file__).parent / "static"
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DB_URI")
 app.config["HOST_ADDR"] = os.getenv("HOST_ADDR")
 
@@ -37,6 +38,11 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(game_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(leaderboard_bp)
+
+
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(app.config["STATIC_FOLDER"], "favicon.ico")
 
 
 @app.route("/media/<path:media_path>")
