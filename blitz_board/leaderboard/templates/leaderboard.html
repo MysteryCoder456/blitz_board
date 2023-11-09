@@ -16,7 +16,7 @@
         </a>
     </div>
 
-    <div class="mt-4 flex flex-col gap-5 max-h-[70vh] overflow-y-auto">
+    <div class="mt-4 flex flex-col gap-5 max-h-[60vh] overflow-y-auto">
         {% for i, (player, max_speed) in enumerate(ranked_players) %}
             {% if player.avatar %}
                 {% set avatar = url_for("site_media", media_path=player.avatar) %}
