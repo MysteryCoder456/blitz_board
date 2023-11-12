@@ -13,7 +13,7 @@
 
 @font-face {
     font-family: "Roboto Mono";
-    src: url("fonts/RobotoMono.ttf");
+    src: url("/static/fonts/RobotoMono.ttf");
 }
 
 html {
