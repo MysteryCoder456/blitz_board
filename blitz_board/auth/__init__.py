@@ -15,6 +15,7 @@ from PIL import Image
 
 from .. import db, app, smtp
 from .models import User, UnverifiedUser, MagicLink, FriendRequest, Friends
+from ..game.models import SessionStats
 from .signals import friend_added
 
 LINK_DURATION = timedelta(hours=2)
@@ -215,7 +216,7 @@ def verify_login(code: str):
         flash("Invalid login link, please try again.", "error")
         return redirect(url_for("auth.login"))
 
-    login_user(magic_link.user, remember=True, duration=timedelta(days=1))
+    login_user(magic_link.user, remember=True, duration=timedelta(weeks=1))
     flash(f"Welcome back, {magic_link.user}!", "success")
 
     db.session.delete(magic_link)
@@ -240,7 +241,14 @@ def user_profile(user_id: int):
         description="The requested user does not exist!",
     )
 
-    recent_sessions = user.sessions[:10]  # type: ignore
+    recent_session_query = (
+        db.select(SessionStats)
+        .where(SessionStats.user_id == user_id)
+        .order_by(SessionStats.timestamp.desc())
+    )
+    recent_sessions = (
+        db.session.execute(recent_session_query).scalars().fetchmany(10)
+    )
     total_game_count = len(user.sessions)  # type: ignore
 
     avg_speed = (
