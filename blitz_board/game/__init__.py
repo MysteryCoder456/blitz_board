@@ -244,18 +244,21 @@ def test_complete(typed_sentence: str):
         return
 
     time_taken = now - game_room.started_at  # type: ignore
-    word_count = game_room.test_sentence.count(" ") + 1
-    accuracy = min(len(typed_sentence) / len(game_room.test_sentence), 1)
+    test_char_count = len(game_room.test_sentence)
+    test_word_count = game_room.test_sentence.count(" ") + 1
+    correct_char_count = test_char_count
 
     if typed_sentence != game_room.test_sentence:
         for typed_char, test_char in zip(
             typed_sentence, game_room.test_sentence
         ):
             if typed_char != test_char:
-                accuracy -= 1 / len(game_room.test_sentence)
+                correct_char_count -= 1
 
+    accuracy = correct_char_count / test_char_count
+    correct_word_count = correct_char_count / 5
     typing_speed = (
-        accuracy * word_count / time_taken.total_seconds() * 60
+        correct_word_count / time_taken.total_seconds() * 60
     )  # in WPM
 
     player_id: int | None = None
@@ -286,7 +289,7 @@ def test_complete(typed_sentence: str):
             user_id=user_id,
             speed=typing_speed,
             accuracy=accuracy,
-            word_count=word_count,
+            word_count=test_word_count,
         )
         db.session.add(stats)
         db.session.commit()
