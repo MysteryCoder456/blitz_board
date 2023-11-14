@@ -6,7 +6,7 @@
     <h1 class="text-2xl">Chats</h1>
 
     {% if channels %}
-        <div class="mt-4">
+        <div class="mt-4 flex flex-col gap-5 max-h-[60vh] overflow-y-auto">
             {% for channel in channels %}
                 <div class="chat-channel li">
                     <p class="underline underline-offset-4 decoration-[rgb(var(--neon-blue))]">

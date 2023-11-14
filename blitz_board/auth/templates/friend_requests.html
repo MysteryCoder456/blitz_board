@@ -11,7 +11,7 @@
             <input id="form-input" name="{{ form.from_id.name }}" />
         </form>
 
-        <div class="mt-4">
+        <div class="mt-4 flex flex-col gap-5 max-h-[60vh] overflow-y-auto">
             {% for req in friend_reqs %}
                 <div class="friend-request li">
                     <div class="flex flex-row items-center gap-4">
