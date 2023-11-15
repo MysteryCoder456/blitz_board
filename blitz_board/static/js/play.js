@@ -129,11 +129,37 @@ socket.on("test start", ({ test_sentence, starting_in }) => {
     countdownId = setInterval(updateCountdown, 1000);
 
     // Create the typing area elements
-    for (let i = 0; i < test_sentence.length; i++) {
-        const newSpan = document.createElement("span");
-        newSpan.id = `char-${i}`;
-        newSpan.innerText = test_sentence[i];
-        typingArea.appendChild(newSpan);
+    let charCount = 0;
+    let words = test_sentence.split(" ");
+    words = words.map((e, i) => {
+        if (i < words.length - 1) {
+            return `${e} `;
+        }
+        return e;
+    });
+    console.log(words);
+
+    for (let i = 0; i < words.length; i++) {
+        const newDiv = document.createElement("div");
+        newDiv.className = "word"
+
+        for (let j = 0; j < words[i].length; j++) {
+            const newSpan = document.createElement("span");
+            newSpan.id = `char-${charCount}`;
+
+            const char = words[i][j];
+
+            if (char === " ") {
+                newSpan.innerHTML = "&nbsp";
+            } else {
+                newSpan.innerText = char;
+            }
+
+            newDiv.appendChild(newSpan);
+            charCount++;
+        }
+
+        typingArea.appendChild(newDiv);
     }
 });
 

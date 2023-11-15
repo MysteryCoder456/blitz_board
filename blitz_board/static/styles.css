@@ -185,6 +185,10 @@ canvas {
     align-items: center;
 }
 
+.word {
+    display: inline-block;
+}
+
 #typing-area {
     user-select: none;
     font-size: 1.25em;
