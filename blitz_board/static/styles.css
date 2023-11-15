@@ -192,6 +192,7 @@ canvas {
 #typing-area > span {
     float: left;
     white-space: pre;
+    /* font-size: 1.25rem; */
 }
 
 #cursor {
@@ -199,5 +200,5 @@ canvas {
     background: rgb(var(--neon-blue));
     position: absolute;
     z-index: -5;
-    transition: top 0.03s, left 0.03s;
+    transition: top 0.04s cubic-bezier(0.17, 0.67, 0.79, 0.89), left 0.04s cubic-bezier(0.17, 0.67, 0.79, 0.89);
 }
