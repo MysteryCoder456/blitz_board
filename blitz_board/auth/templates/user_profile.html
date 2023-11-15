@@ -20,7 +20,7 @@
         <div>
             <p>Total Games Played: {{ total_game_count }}</p>
             <p>Average Speed (All Time): {{ avg_speed }} WPM</p>
-            <p>Average Speed (Recent): {{ avg_speed }} WPM</p>
+            <p>Average Speed (Recent): {{ avg_speed_recent }} WPM</p>
 
             {% if current_user.is_authenticated %}
                 <div class="mt-5 text-center">

@@ -187,6 +187,7 @@ canvas {
 
 #typing-area {
     user-select: none;
+    font-size: 1.25em;
 }
 
 #typing-area > span {
