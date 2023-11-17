@@ -1,9 +1,15 @@
 const playerCardTemplate = document.querySelector("#player-card-template");
+
 const statusHeader = document.querySelector("#status-header");
 const playerList = document.querySelector("#player-list");
 const startBtn = document.querySelector("#start-btn");
+
 const typingArea = document.querySelector("#typing-area");
 const cursor = document.querySelector("#cursor");
+
+const alertAudio = document.querySelector("#alert-sfx");
+const finishAudio = document.querySelector("#finish-sfx");
+const countdownAudio = document.querySelector("#countdown-sfx");
 
 const socket = io("/game", {
     auth: {
@@ -75,13 +81,14 @@ function updateCursorPosition() {
 
 function updateCountdown() {
     if (countdown > 0) {
-        // TODO: clock ticking sfx
         statusHeader.innerHTML = `Game Starting in <b>${countdown}</b>`;
         countdown--;
+        countdownAudio.play();
     } else {
         startGame();
         clearInterval(countdownId);
         statusHeader.innerText = "Game Started!";
+        finishAudio.play();
     }
 }
 
@@ -109,12 +116,14 @@ socket.on("player join", (player) => {
     // Create player card for new player
     const card = createPlayerCard(player);
     playerList.appendChild(card);
+    alertAudio.play();
 });
 
 socket.on("player leave", (playerId) => {
     // Remove corresponding player card
     const card = playerList.querySelector(`#player-card-${playerId}`);
     card.remove();
+    alertAudio.play();
 });
 
 socket.on("test start", ({ test_sentence, starting_in }) => {
@@ -185,6 +194,9 @@ socket.on("test complete", ({ player_id, speed, accuracy }) => {
     cardProgress.parentNode.appendChild(finishedSpan);
     cardProgress.parentNode.appendChild(infoSpan);
     cardProgress.remove(cardProgress);
+
+    // Play SFX
+    finishAudio.play();
 });
 
 window.onresize = updateCursorPosition;

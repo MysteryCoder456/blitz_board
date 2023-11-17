@@ -14,6 +14,16 @@
 {% endblock head %}
 
 {% block main %}
+    <audio id="alert-sfx">
+        <source src="{{ alert_sfx }}" type="audio/wav" />
+    </audio>
+    <audio id="finish-sfx">
+        <source src="{{ finish_sfx }}" type="audio/wav" />
+    </audio>
+    <audio id="countdown-sfx">
+        <source src="{{ countdown_sfx }}" type="audio/wav" />
+    </audio>
+    
     <template id="player-card-template">
         <div class="player-card grid grid-cols-10 items-center gap-2" id="player-card-0">
             <img src="{{ default_pfp }}" alt="Profile Picture" width=50 height=50 class="rounded-full" />

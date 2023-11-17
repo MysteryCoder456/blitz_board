@@ -346,6 +346,9 @@ def play_game(game_id: int):
         enumerate=enumerate,
         socket_io=url_for("static", filename="js/socket.io.js"),
         play_script=url_for("static", filename="js/play.js"),
+        alert_sfx=url_for("static", filename="sounds/alert.wav"),
+        finish_sfx=url_for("static", filename="sounds/finish.wav"),
+        countdown_sfx=url_for("static", filename="sounds/countdown.wav"),
         default_pfp=url_for("static", filename="images/default-pfp.jpg"),
     )
 

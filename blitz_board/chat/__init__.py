@@ -147,5 +147,6 @@ def chat_page(channel_id):
         channel=channel,
         messages=messages,
         socket_io=url_for("static", filename="js/socket.io.js"),
+        alert_sfx=url_for("static", filename="sounds/alert.wav"),
         chat_script=url_for("static", filename="js/chat.js"),
     )

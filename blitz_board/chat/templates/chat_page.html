@@ -13,6 +13,10 @@
 {% endblock head %}
 
 {% block main %}
+    <audio id="alert-sfx">
+        <source src="{{ alert_sfx }}" />
+    </audio>
+
     <template id="msg-template">
         <div id="msg-0" class="message flex flex-col justify-start" dir="ltr">
             <div class="flex flex-row items-center gap-3">
