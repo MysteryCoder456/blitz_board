@@ -87,6 +87,40 @@ auth_bp = Blueprint(
 )
 
 
+def determine_user_relation(first_id: int, second_id: int) -> FriendStatus:
+    """
+    Determines the relationship of second user with respect to first user.
+
+    @param `first_id`: ID of first user.
+    @param `second_id`: ID of second user.
+    @returns: A "status" informing about the users' relationship.
+    """
+
+    outgoing_query = db.select(FriendRequest).where(
+        (FriendRequest.from_id == first_id)
+        & (FriendRequest.to_id == second_id)
+    )
+    incoming_query = db.select(FriendRequest).where(
+        (FriendRequest.from_id == second_id)
+        & (FriendRequest.to_id == first_id)
+    )
+    friend_status = FriendStatus.stranger
+
+    if Friends.check_friends(first_id, second_id):
+        # Users are already friends
+        friend_status = FriendStatus.friend
+
+    elif db.session.execute(outgoing_query).fetchone():
+        # Current user has sent friend request to viewed user
+        friend_status = FriendStatus.outgoing_request
+
+    elif db.session.execute(incoming_query).fetchone():
+        # Current user has received friend request from viewed user
+        friend_status = FriendStatus.incoming_request
+
+    return friend_status
+
+
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm(request.form)
@@ -277,27 +311,7 @@ def user_profile(user_id: int):
     # Determine the users' relationship
     if current_user.is_authenticated:
         if current_user != user:  # type: ignore
-            outgoing_query = db.select(FriendRequest).where(
-                (FriendRequest.from_id == current_user.id)  # type: ignore
-                & (FriendRequest.to_id == user_id)
-            )
-            incoming_query = db.select(FriendRequest).where(
-                (FriendRequest.from_id == user_id)
-                & (FriendRequest.to_id == current_user.id)  # type: ignore
-            )
-
-            if Friends.check_friends(current_user.id, user_id):  # type: ignore
-                # Users are already friends
-                friend_status = FriendStatus.friend
-
-            elif db.session.execute(outgoing_query).fetchone():
-                # Current user has sent friend request to viewed user
-                friend_status = FriendStatus.outgoing_request
-
-            elif db.session.execute(incoming_query).fetchone():
-                # Current user has received friend request from viewed user
-                friend_status = FriendStatus.incoming_request
-
+            friend_status = determine_user_relation(current_user.id, user_id)
         else:
             friend_req_query = (
                 db.select(func.count())
@@ -305,7 +319,6 @@ def user_profile(user_id: int):
                 .where(FriendRequest.to_id == current_user.id)
             )
             friend_req_count = db.session.execute(friend_req_query).scalar()
-            print(friend_req_count)
 
     form = SendFriendRequestForm(request.form)
 
