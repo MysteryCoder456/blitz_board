@@ -11,6 +11,7 @@ from flask_wtf.file import FileField, FileAllowed
 from wtforms.fields import EmailField, StringField, SubmitField, IntegerField
 from wtforms.validators import Email, Length
 from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy.sql import func
 from PIL import Image
 
 from .. import db, app, smtp
@@ -271,29 +272,40 @@ def user_profile(user_id: int):
         user_pfp = url_for("static", filename="images/default-pfp.jpg")
 
     friend_status = FriendStatus.stranger
+    friend_req_count = 0
 
     # Determine the users' relationship
-    if current_user.is_authenticated and current_user != user:  # type: ignore
-        outgoing_query = db.select(FriendRequest).where(
-            (FriendRequest.from_id == current_user.id)  # type: ignore
-            & (FriendRequest.to_id == user_id)
-        )
-        incoming_query = db.select(FriendRequest).where(
-            (FriendRequest.from_id == user_id)
-            & (FriendRequest.to_id == current_user.id)  # type: ignore
-        )
+    if current_user.is_authenticated:
+        if current_user != user:  # type: ignore
+            outgoing_query = db.select(FriendRequest).where(
+                (FriendRequest.from_id == current_user.id)  # type: ignore
+                & (FriendRequest.to_id == user_id)
+            )
+            incoming_query = db.select(FriendRequest).where(
+                (FriendRequest.from_id == user_id)
+                & (FriendRequest.to_id == current_user.id)  # type: ignore
+            )
 
-        if Friends.check_friends(current_user.id, user_id):  # type: ignore
-            # Users are already friends
-            friend_status = FriendStatus.friend
+            if Friends.check_friends(current_user.id, user_id):  # type: ignore
+                # Users are already friends
+                friend_status = FriendStatus.friend
 
-        elif db.session.execute(outgoing_query).fetchone():
-            # Current user has sent friend request to viewed user
-            friend_status = FriendStatus.outgoing_request
+            elif db.session.execute(outgoing_query).fetchone():
+                # Current user has sent friend request to viewed user
+                friend_status = FriendStatus.outgoing_request
 
-        elif db.session.execute(incoming_query).fetchone():
-            # Current user has received friend request from viewed user
-            friend_status = FriendStatus.incoming_request
+            elif db.session.execute(incoming_query).fetchone():
+                # Current user has received friend request from viewed user
+                friend_status = FriendStatus.incoming_request
+
+        else:
+            friend_req_query = (
+                db.select(func.count())
+                .select_from(FriendRequest)
+                .where(FriendRequest.to_id == current_user.id)
+            )
+            friend_req_count = db.session.execute(friend_req_query).scalar()
+            print(friend_req_count)
 
     form = SendFriendRequestForm(request.form)
 
@@ -378,6 +390,7 @@ def user_profile(user_id: int):
         avg_speed=avg_speed,
         avg_speed_recent=avg_speed_recent,
         recent_sessions=recent_sessions,
+        friend_req_count=friend_req_count,
         friend_status=friend_status,
         form=form,
     )

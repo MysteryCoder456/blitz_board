@@ -29,7 +29,7 @@
                             href="{{ url_for("auth.friend_requests") }}"
                             class="underline underline-offset-4"
                         >
-                            Friend Requests
+                            Friend Requests ({{ friend_req_count }})
                         </a>
                     {% else %}
                         {% set default_style = "btn bg-[rgb(var(--neon-blue))]" %}
