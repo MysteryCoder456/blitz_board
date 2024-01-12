@@ -151,11 +151,11 @@ def login():
             verify_prefix = app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
             verify_link = f"{verify_prefix}{endpoint}"
 
-            msg_content = [
-                "Click on this link to confirm and create a new account.",
-                verify_link,
-                "Please do not share this link with anyone. Happy Typing! :)",
-            ]
+            msg_content = (
+                "Click on this link to confirm and create a new account."
+                f"{verify_link}"
+                "Please do not share this link with anyone. Happy Typing! :)"
+            )
             smtp.send(
                 to=form.email.data,
                 subject="Confirm Registration",
@@ -189,11 +189,11 @@ def login():
             verify_prefix = app.config["HOST_ADDR"] or "http://127.0.0.1:5000"
             verify_link = f"{verify_prefix}{endpoint}"
 
-            msg_content = [
-                "Click on this link to log into your account.",
-                verify_link,
-                "Please do not share this link with anyone. Happy Typing! :)",
-            ]
+            msg_content = (
+                "Click on this link to log into your account.\n"
+                f"{verify_link}\n"
+                "Please do not share this link with anyone. Happy Typing! :)"
+            )
             smtp.send(
                 to=form.email.data,
                 subject="Confirm Login",
@@ -379,12 +379,13 @@ def user_profile(user_id: int):
         current_profile_url = current_profile_prefix + current_profile
 
         # Send email notification to request receiver
-        msg_content = [
-            f"Hey there, <b>{user.username}</b>!",
-            f'\n<a href="{current_profile_url}">{current_user.username}</a> would like to be your friend.',  # type: ignore
-            "\nRegards,",
-            "The Blitz Board Team",
-        ]
+        msg_content = (
+            f"Hey there, <b>{user.username}</b>!"
+            f'\n\n<a href="{current_profile_url}">{current_user.username}</a> would like to be your friend.'
+            "\n\nRegards,"
+            "The Blitz Board Team"
+        )
+
         smtp.send(
             to=user.email,
             subject="New Friend Request on Blitz Board",
