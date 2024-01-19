@@ -18,7 +18,7 @@ services:
       - db
 
   db:
-    image: postgres:15-bookworm
+    image: postgres:16-bookworm
     volumes:
       - database:/var/lib/postgresql/data
     environment:
