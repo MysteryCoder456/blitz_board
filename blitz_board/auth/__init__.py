@@ -152,8 +152,8 @@ def login():
             verify_link = f"{verify_prefix}{endpoint}"
 
             msg_content = (
-                "Click on this link to confirm and create a new account."
-                f"{verify_link}"
+                "Click on this link to confirm and create a new account.<br>"
+                f"{verify_link}<br>"
                 "Please do not share this link with anyone. Happy Typing! :)"
             )
             smtp.send(
@@ -190,8 +190,8 @@ def login():
             verify_link = f"{verify_prefix}{endpoint}"
 
             msg_content = (
-                "Click on this link to log into your account.\n"
-                f"{verify_link}\n"
+                "Click on this link to log into your account.<br>"
+                f"{verify_link}<br>"
                 "Please do not share this link with anyone. Happy Typing! :)"
             )
             smtp.send(
@@ -380,9 +380,9 @@ def user_profile(user_id: int):
 
         # Send email notification to request receiver
         msg_content = (
-            f"Hey there, <b>{user.username}</b>!"
-            f'\n\n<a href="{current_profile_url}">{current_user.username}</a> would like to be your friend.'
-            "\n\nRegards,"
+            f"Hey there, <b>{user.username}</b>!<br><br>"
+            f'<a href="{current_profile_url}">{current_user.username}</a> would like to be your friend.<br><br>'
+            "Regards,<br>"
             "The Blitz Board Team"
         )
 
