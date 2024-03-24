@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import csv
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -20,7 +22,7 @@ from flask_socketio import emit, join_room
 from wtforms.fields import BooleanField, IntegerField, SubmitField
 from wtforms.validators import NumberRange
 
-from blitz_board import socketio, db
+from blitz_board import socketio, db, redis_client
 from .models import SessionStats
 from ..auth.models import User
 
@@ -46,9 +48,35 @@ def generate_random_sentence(word_count: int) -> str:
 
 @dataclass
 class Player:
+    player_id: int
     permanent_id: int | None
     username: str
     session_id: str | None = field(default=None)
+
+    @classmethod
+    def get_from_redis(cls, player_id: int) -> Player:
+        data: dict = redis_client.hgetall(f"player:{player_id}")  # type: ignore
+
+        return Player(
+            player_id=player_id,
+            permanent_id=int(data.get("permanent_id") or 0),
+            username=data["username"],
+            session_id=data.get("session_id"),
+        )
+
+    def save_to_redis(self):
+        data = {
+            "player_id": self.player_id,
+            "username": self.username,
+        }
+
+        if perm_id := self.permanent_id:
+            data["permanent_id"] = perm_id
+
+        if sess_id := self.session_id:
+            data["session_id"] = sess_id
+
+        redis_client.hset(f"player:{self.player_id}", mapping=data)
 
 
 @dataclass
@@ -62,12 +90,51 @@ class GameSession:
     started: bool = field(default=False)
     started_at: datetime | None = field(default=None)
 
+    @classmethod
+    def get_from_redis(cls, game_id: int) -> GameSession:
+        data: dict = redis_client.hgetall(f"game:{game_id}")  # type: ignore
+        players: dict[int, Player] = {
+            int(player): Player.get_from_redis(int(player))
+            for player in redis_client.lrange(f"players:{game_id}", 0, -1)  # type: ignore
+        }
+
+        return GameSession(
+            game_id=game_id,
+            private=bool(data["private"]),
+            host_id=int(data["host_id"]),
+            test_sentence=data["test_sentence"],
+            player_limit=int(data["player_limit"]),
+            players=players,
+            started=bool(data["started"]),
+            started_at=datetime.fromisoformat(data["started_at"])
+            if "started_at" in data
+            else None,
+        )
+
+    def save_to_redis(self):
+        data = {
+            "game_id": self.game_id,
+            "private": self.private,
+            "host_id": self.host_id,
+            "test_sentence": self.test_sentence,
+            "player_limit": self.player_limit,
+            "started": self.started,
+        }
+
+        if started_at := self.started_at:
+            data["started_at"] = started_at.isoformat()
+
+        redis_client.hset(f"game:{self.game_id}", mapping=data)
+
     def start(self, *, seconds_from_now: int = 0):
         if not self.started:
             self.started = True
             self.started_at = datetime.now() + timedelta(
                 seconds=seconds_from_now
             )
+
+
+# TODO: Update business logic to take redis into account
 
 
 class CreateRoomForm(FlaskForm):
@@ -319,6 +386,7 @@ def join_random():
     session["game_id"] = game.game_id
 
     game.players[player_id] = Player(
+        player_id=player_id,
         permanent_id=user_id,
         username=username,
     )

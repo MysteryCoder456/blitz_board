@@ -23,7 +23,7 @@ csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 smtp = SMTP(os.getenv("SMTP_USERNAME"), os.getenv("SMTP_PASSWORD"))
 socketio = SocketIO(app, cors_allowed_origins="*")
-redis = Redis(
+redis_client = Redis(
     host=os.getenv("REDIS_HOST") or "127.0.0.1",
     port=int(os.getenv("REDIS_PORT") or "6379"),
 )
