@@ -22,6 +22,7 @@ pillow = "^10.0"
 alembic = "^1.10"
 gunicorn = "^21.2"
 eventlet = "^0.33"
+redis = "^5.0.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3"

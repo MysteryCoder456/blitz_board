@@ -8,6 +8,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager
 from flask_socketio import SocketIO
 from yagmail import SMTP
+from redis import Redis
 
 load_dotenv()
 
@@ -22,6 +23,10 @@ csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 smtp = SMTP(os.getenv("SMTP_USERNAME"), os.getenv("SMTP_PASSWORD"))
 socketio = SocketIO(app, cors_allowed_origins="*")
+redis = Redis(
+    host=os.getenv("REDIS_HOST") or "127.0.0.1",
+    port=int(os.getenv("REDIS_PORT") or "6379"),
+)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "auth.login"  # type: ignore
