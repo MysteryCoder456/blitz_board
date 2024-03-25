@@ -10,6 +10,9 @@ from flask_socketio import SocketIO
 from yagmail import SMTP
 from redis import Redis
 
+REDIS_HOST = os.getenv("REDIS_HOST") or "127.0.0.1"
+REDIS_PORT = int(os.getenv("REDIS_PORT") or "6379")
+
 load_dotenv()
 
 app = Flask(__name__)
@@ -22,11 +25,12 @@ app.config["HOST_ADDR"] = os.getenv("HOST_ADDR")
 csrf = CSRFProtect(app)
 db = SQLAlchemy(app)
 smtp = SMTP(os.getenv("SMTP_USERNAME"), os.getenv("SMTP_PASSWORD"))
-socketio = SocketIO(app, cors_allowed_origins="*")
-redis = Redis(
-    host=os.getenv("REDIS_HOST") or "127.0.0.1",
-    port=int(os.getenv("REDIS_PORT") or "6379"),
+socketio = SocketIO(
+    app,
+    cors_allowed_origins="*",
+    message_queue=f"redis://{REDIS_HOST}:{REDIS_PORT}",
 )
+redis_client = Redis(host=REDIS_HOST, port=REDIS_PORT)
 
 login_manager = LoginManager(app)
 login_manager.login_view = "auth.login"  # type: ignore
