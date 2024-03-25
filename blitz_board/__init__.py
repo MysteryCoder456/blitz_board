@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from gevent import monkey
+
+monkey.patch_all()
 
 from dotenv import load_dotenv
 from flask import Flask, send_from_directory
