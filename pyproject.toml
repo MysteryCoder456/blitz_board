@@ -21,8 +21,9 @@ simple-websocket = "^0.10"
 pillow = "^10.0"
 alembic = "^1.10"
 gunicorn = "^21.2"
-eventlet = "^0.33"
 redis = "^5.0.3"
+gevent = "^24.2.1"
+gevent-websocket = "^0.10.1"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.3"
