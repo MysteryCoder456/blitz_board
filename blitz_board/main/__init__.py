@@ -61,7 +61,7 @@ def home():
             user_id = current_user.id  # type: ignore
             username = current_user.username  # type: ignore
 
-        if game := GameSession.get_from_redis(game_id):
+        if game := GameSession.get(game_id):
             if len(game.players) >= game.player_limit:
                 flash("This game is full!", "warning")
                 return redirect(url_for("main.home"))
@@ -75,7 +75,7 @@ def home():
                 permanent_id=user_id,
                 username=username,
             )
-            game.save_to_redis()
+            game.save()
 
             return redirect(url_for("game.play_game", game_id=game_id))
 
