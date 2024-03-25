@@ -1,10 +1,11 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 from gevent import monkey
 
+load_dotenv()
 monkey.patch_all()
 
-from dotenv import load_dotenv
 from flask import Flask, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -16,7 +17,6 @@ from redis import Redis
 REDIS_HOST = os.getenv("REDIS_HOST") or "127.0.0.1"
 REDIS_PORT = int(os.getenv("REDIS_PORT") or "6379")
 
-load_dotenv()
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
