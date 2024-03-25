@@ -16,7 +16,7 @@ from wtforms import ValidationError
 from wtforms.fields import StringField, SubmitField
 from wtforms.validators import Length
 
-from ..game import Player, games
+from ..game import Player, GameSession
 
 
 class JoinGameForm(FlaskForm):
@@ -53,15 +53,15 @@ def home():
     form = JoinGameForm(request.form)
 
     if form.validate_on_submit():
-        game_id = int(form.game_id.data)
+        game_id = int(form.game_id.data)  # type: ignore
         user_id = None
-        username = form.username.data
+        username: str = form.username.data  # type: ignore
 
         if current_user.is_authenticated:  # type: ignore
             user_id = current_user.id  # type: ignore
             username = current_user.username  # type: ignore
 
-        if game := games.get(game_id):
+        if game := GameSession.get_from_redis(game_id):
             if len(game.players) >= game.player_limit:
                 flash("This game is full!", "warning")
                 return redirect(url_for("main.home"))
@@ -71,9 +71,11 @@ def home():
             session["game_id"] = game_id
 
             game.players[player_id] = Player(
+                player_id=player_id,
                 permanent_id=user_id,
                 username=username,
             )
+            game.save_to_redis()
 
             return redirect(url_for("game.play_game", game_id=game_id))
 

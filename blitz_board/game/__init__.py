@@ -54,17 +54,33 @@ class Player:
     session_id: str | None = field(default=None)
 
     @classmethod
-    def get_from_redis(cls, player_id: int) -> Player:
-        data: dict = redis_client.hgetall(f"player:{player_id}")  # type: ignore
+    def get_from_redis(cls, game_id: int, player_id: int) -> Player | None:
+        data: dict = redis_client.hgetall(f"game:{game_id}:player:{player_id}")  # type: ignore
+
+        if not data:
+            return None
 
         return Player(
             player_id=player_id,
-            permanent_id=int(data.get("permanent_id") or 0),
-            username=data["username"],
-            session_id=data.get("session_id"),
+            permanent_id=int(data[b"permanent_id"])
+            if b"permanent_id" in data
+            else None,
+            username=data[b"username"].decode(),
+            session_id=data.get(b"session_id").decode()  # type: ignore
+            if b"session_id" in data
+            else None,
         )
 
-    def save_to_redis(self):
+    @classmethod
+    def exists_in_redis(cls, game_id: int, player_id: int) -> bool:
+        return bool(
+            redis_client.sismember(
+                f"game:{game_id}:players",
+                str(player_id),
+            )
+        )
+
+    def save_to_redis(self, game_id: int):
         data = {
             "player_id": self.player_id,
             "username": self.username,
@@ -76,7 +92,14 @@ class Player:
         if sess_id := self.session_id:
             data["session_id"] = sess_id
 
-        redis_client.hset(f"player:{self.player_id}", mapping=data)
+        redis_client.hset(
+            f"game:{game_id}:player:{self.player_id}", mapping=data
+        )
+        redis_client.sadd(f"game:{game_id}:players", self.player_id)
+
+    def delete_from_redis(self, game_id: int):
+        redis_client.delete(f"game:{game_id}:player:{self.player_id}")
+        redis_client.srem(f"game:{game_id}:players", self.player_id)
 
 
 @dataclass
@@ -91,40 +114,67 @@ class GameSession:
     started_at: datetime | None = field(default=None)
 
     @classmethod
-    def get_from_redis(cls, game_id: int) -> GameSession:
+    def get_from_redis(cls, game_id: int) -> GameSession | None:
         data: dict = redis_client.hgetall(f"game:{game_id}")  # type: ignore
+
+        if not data:
+            return None
+
         players: dict[int, Player] = {
-            int(player): Player.get_from_redis(int(player))
-            for player in redis_client.lrange(f"players:{game_id}", 0, -1)  # type: ignore
+            int(player): Player.get_from_redis(game_id, int(player))
+            for player in redis_client.smembers(f"game:{game_id}:players")  # type: ignore
+            if Player.exists_in_redis(game_id, int(player))
         }
 
         return GameSession(
             game_id=game_id,
-            private=bool(data["private"]),
-            host_id=int(data["host_id"]),
-            test_sentence=data["test_sentence"],
-            player_limit=int(data["player_limit"]),
+            private=data[b"private"] == b"1",
+            host_id=int(data[b"host_id"]),
+            test_sentence=data[b"test_sentence"].decode(),
+            player_limit=int(data[b"player_limit"]),
             players=players,
-            started=bool(data["started"]),
-            started_at=datetime.fromisoformat(data["started_at"])
-            if "started_at" in data
+            started=data[b"started"] == b"1",
+            started_at=datetime.fromisoformat(data[b"started_at"].decode())
+            if b"started_at" in data
             else None,
         )
+
+    @classmethod
+    def get_all_from_redis(cls) -> set[GameSession]:
+        game_ids: set[str] = redis_client.smembers("games")  # type: ignore
+        return set(cls.get_from_redis(int(game_id)) for game_id in game_ids)  # type: ignore
+
+    @classmethod
+    def exists_in_redis(cls, game_id: int) -> bool:
+        return bool(redis_client.sismember("games", str(game_id)))
 
     def save_to_redis(self):
         data = {
             "game_id": self.game_id,
-            "private": self.private,
+            "private": str(int(self.private)),
             "host_id": self.host_id,
             "test_sentence": self.test_sentence,
             "player_limit": self.player_limit,
-            "started": self.started,
+            "started": str(int(self.started)),
         }
 
         if started_at := self.started_at:
             data["started_at"] = started_at.isoformat()
 
+        # Save game session data
         redis_client.hset(f"game:{self.game_id}", mapping=data)
+        redis_client.sadd("games", self.game_id)
+
+        # Save player data
+        for player in self.players.values():
+            player.save_to_redis(self.game_id)
+
+    def delete_from_redis(self):
+        redis_client.delete(f"game:{self.game_id}")
+        redis_client.srem("games", self.game_id)
+
+        for player in self.players.values():
+            player.delete_from_redis(self.game_id)
 
     def start(self, *, seconds_from_now: int = 0):
         if not self.started:
@@ -132,9 +182,6 @@ class GameSession:
             self.started_at = datetime.now() + timedelta(
                 seconds=seconds_from_now
             )
-
-
-# TODO: Update business logic to take redis into account
 
 
 class CreateRoomForm(FlaskForm):
@@ -159,14 +206,13 @@ game_bp = Blueprint(
     url_prefix="/game",
     template_folder=templates,
 )
-games: dict[int, GameSession] = {}
 
 
 @socketio.on("connect", namespace="/game")
 def socket_connect(auth: dict):
     player_id = auth["player_id"]
     game_id = auth["game_id"]
-    game_room: GameSession | None = games.get(game_id)
+    game_room = GameSession.get_from_redis(game_id)
 
     if (
         not game_room
@@ -177,6 +223,7 @@ def socket_connect(auth: dict):
 
     player = game_room.players[player_id]
     player.session_id = request.sid  # type: ignore
+    player.save_to_redis(game_id)
 
     avatar = (
         url_for("site_media", media_path=current_user.avatar)  # type: ignore
@@ -231,7 +278,37 @@ def socket_connect(auth: dict):
 def socket_disconnect():
     game_id = session["game_id"]
     player_id: int | None = None
-    game_room = games[game_id]
+    player: Player | None = None
+    game_room: GameSession = GameSession.get_from_redis(game_id)  # type: ignore
+
+    for p_id, p in game_room.players.items():
+        if p.session_id == request.sid:  # type: ignore
+            player_id = p_id
+            player = p
+            break
+    else:
+        return
+
+    player.delete_from_redis(game_id)
+    del game_room.players[player_id]
+    emit("player leave", player_id, to=game_id)
+
+    # Delete game if all the players have left
+    if not game_room.players:
+        game_room.delete_from_redis()
+    else:
+        game_room.save_to_redis()
+
+
+@socketio.on("test start", namespace="/game")
+def test_start():
+    player_room = session["game_id"]
+    game_room: GameSession = GameSession.get_from_redis(player_room)  # type: ignore
+
+    if game_room.started:
+        return
+
+    player_id: int | None = None
 
     for p_id, p in game_room.players.items():
         if p.session_id == request.sid:  # type: ignore
@@ -240,33 +317,7 @@ def socket_disconnect():
     else:
         return
 
-    del game_room.players[player_id]
-    emit("player leave", player_id, to=game_id)
-
-    # Delete game if all the players have left
-    if not game_room.players:
-        del games[game_id]
-
-
-@socketio.on("test start", namespace="/game")
-def test_start():
-    player_room = session["game_id"]
-    game_room = games[player_room]
-
-    if game_room.started:
-        return
-
-    player_id: int | None = None
-
-    for p_id, p in games[player_room].players.items():
-        if p.session_id == request.sid:  # type: ignore
-            player_id = p_id
-            break
-    else:
-        return
-
     if game_room.host_id == player_id:
-        game_room.start(seconds_from_now=START_COUNTDOWN)
         emit(
             "test start",
             {
@@ -275,19 +326,21 @@ def test_start():
             },
             to=game_room.game_id,
         )
+        game_room.start(seconds_from_now=START_COUNTDOWN)
+        game_room.save_to_redis()
 
 
 @socketio.on("test progress", namespace="/game")
 def test_progress(progress: float):
     player_room = session["game_id"]
-    game_room = games[player_room]
+    game_room: GameSession = GameSession.get_from_redis(player_room)  # type: ignore
 
     if not game_room.started:
         return
 
     player_id: int | None = None
 
-    for p_id, p in games[player_room].players.items():
+    for p_id, p in game_room.players.items():
         if p.session_id == request.sid:  # type: ignore
             player_id = p_id
             break
@@ -305,7 +358,7 @@ def test_progress(progress: float):
 def test_complete(typed_sentence: str):
     now = datetime.now()
     player_room = session["game_id"]
-    game_room = games[player_room]
+    game_room: GameSession = GameSession.get_from_redis(player_room)  # type: ignore
 
     if not game_room.started:
         return
@@ -351,7 +404,7 @@ def test_complete(typed_sentence: str):
 
     # Update user statistics
     if user_id := player.permanent_id:
-        stats = SessionStats(
+        stats = SessionStats(  # type: ignore
             game_id=game_room.game_id,
             user_id=user_id,
             speed=typing_speed,
@@ -365,7 +418,11 @@ def test_complete(typed_sentence: str):
 @game_bp.route("/joinrandom")
 @login_required
 def join_random():
-    public_games = [g for g in games.values() if not (g.private or g.started)]
+    public_games = [
+        g
+        for g in GameSession.get_all_from_redis()
+        if not (g.private or g.started)
+    ]
 
     if not public_games:
         flash(
@@ -390,18 +447,19 @@ def join_random():
         permanent_id=user_id,
         username=username,
     )
+    game.save_to_redis()
 
     return redirect(url_for("game.play_game", game_id=game.game_id))
 
 
 @game_bp.route("/play/<int:game_id>")
 def play_game(game_id: int):
-    game_room: GameSession | None = games.get(game_id)
-    player_id: int | None = session.get("my_id")
-
-    if not game_room:
+    if not GameSession.exists_in_redis(game_id):
         flash("The requested game was not found!", "error")
         return redirect(url_for("main.home"))
+
+    game_room: GameSession = GameSession.get_from_redis(game_id)  # type: ignore
+    player_id: int | None = session.get("my_id")
 
     if player_id not in game_room.players:
         flash("Unable to join this game!", "error")
@@ -433,7 +491,7 @@ def create_game():
         for _ in range(100):
             game_id = randint(10000, 99999)
 
-            if game_id not in games:
+            if not GameSession.exists_in_redis(game_id):
                 break
 
         else:
@@ -456,13 +514,12 @@ def create_game():
             ),
             player_limit=form.player_limit.data,
         )
-        games[game_id] = new_game
-
-        new_game.host_id = player_id
         new_game.players[player_id] = Player(
+            player_id=player_id,
             permanent_id=current_user.id,  # type: ignore
             username=current_user.username,  # type: ignore
         )
+        new_game.save_to_redis()
 
         return redirect(url_for("game.play_game", game_id=game_id))
 
