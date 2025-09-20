@@ -13,7 +13,7 @@ RUN ${VENV_PATH}/bin/pip install poetry
 WORKDIR /app
 COPY ./pyproject.toml .
 
-RUN ${VENV_PATH}/bin/poetry install --only main
+RUN ${VENV_PATH}/bin/poetry install --only main --no-root
 
 # Setup app diretories & entrypoint
 COPY . .
